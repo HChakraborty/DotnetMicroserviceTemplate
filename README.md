@@ -1,4 +1,4 @@
-```md
+
 # .NET Microservice Template (Incomplete)
 
 A reusable starter template for building .NET microservices using Clean Architecture.
@@ -16,6 +16,7 @@ This project provides a structured base for creating new services with consisten
 
 ## Project Structure
 
+```text
 src/
 ├─ ServiceName.Api
 │ ├─ Controllers
@@ -29,9 +30,9 @@ src/
 │ ├─ Entities
 │ └─ Interfaces
 └─ ServiceName.Infrastructure
-├─ Persistence
-└─ Repositories
-
+  ├─ Persistence
+  └─ Repositories
+```
 
 ## Prerequisites
 
@@ -67,3 +68,4 @@ See the LICENSE file.
 ## Contributing
 
 Pull requests and suggestions are welcome.
+
