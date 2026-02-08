@@ -1,0 +1,9 @@
+services:
+  api:
+    build: .
+    image: servicename-api
+    container_name: servicename-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

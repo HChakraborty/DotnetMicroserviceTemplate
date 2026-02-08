@@ -1,0 +1,29 @@
+# Build output
+**/bin/
+**/obj/
+
+# Visual Studio
+**/.vs/
+**/*.user
+**/*.suo
+
+# Git
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node / frontend (if added later)
+**/node_modules/
+
+# Docker files (optional)
+docker-compose.yml
+Dockerfile
+
+# Test results
+**/TestResults/
+
+# Logs
+**/*.log

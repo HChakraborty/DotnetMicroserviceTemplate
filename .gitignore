@@ -2,11 +2,28 @@
 bin/
 obj/
 
-# Visual Studio
+# Visual Studio / Rider
 .vs/
+.idea/
 *.user
 *.suo
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
+
+# Test results
+TestResults/
+
+# Logs
+*.log
+
+# Docker (local overrides / temp)
+docker-compose.override.yml
+
+# Environment files
+.env
+.env.*
+
+# Coverage reports (future)
+coverage/

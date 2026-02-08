@@ -64,6 +64,33 @@ Open Swagger:
 
 `http://localhost:<port>/swagger`
 
+## 🐳 Run with Docker Compose
+
+### Build and Run Image
+
+```bash
+docker compose up --build
+```
+### Stop Service
+
+```bash
+docker compose down
+```
+
+### Open in Browser
+The container runs in 5000:8080 port by default but you can change in 'docker-compose.yml'.
+
+```bash
+http://localhost:5000/swagger
+```
+
+### Environment
+
+The container runs in Development mode by default but you can change in 'docker-compose.yml'.
+```bash
+ASPNETCORE_ENVIRONMENT=Development
+```
+
 ## Usage
 
 Clone this repository and use it as a base template for new microservices.
