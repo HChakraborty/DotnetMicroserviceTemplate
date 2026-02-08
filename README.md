@@ -50,20 +50,6 @@ Check installation:
 
 `dotnet --version`
 
-## Getting Started
-
-Build the solution:
-
-`dotnet build`
-
-Run the API:
-
-`dotnet run --project src/ServiceName.Api/ServiceName.Api`
-
-Open Swagger:
-
-`http://localhost:<port>/swagger`
-
 ## Run with Docker Compose
 
 ### Build and Run Image
