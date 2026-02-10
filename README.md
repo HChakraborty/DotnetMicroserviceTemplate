@@ -33,7 +33,8 @@ ServiceName
   │ └─ Interfaces
   ├─ ServiceName.Infrastructure
   │ ├─ Persistence
-  │ └─ Repositories
+  │ ├─ Repositories
+  │ └─ Migrations
   tests/
   └─ ServiceName.UnitTests
     ├─ Controllers
