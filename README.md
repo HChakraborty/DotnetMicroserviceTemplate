@@ -29,8 +29,7 @@ ServiceName
   │ ├─ Interfaces
   │ └─ Services
   ├─ ServiceName.Domain
-  │ ├─ Entities
-  │ └─ Interfaces
+  │ └─ Entities
   ├─ ServiceName.Infrastructure
   │ ├─ Persistence
   │ ├─ Repositories
