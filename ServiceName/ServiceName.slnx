@@ -1,7 +1,0 @@
-<Solution>
-  <Project Path="src/ServiceName.Application/ServiceName.Application.csproj" Id="79773ad7-7fe4-45ca-a88e-fea22ad3eb85" />
-  <Project Path="src/ServiceName.Domain/ServiceName.Domain.csproj" Id="99b986f9-b4c5-47c4-ba7c-71d5931a04a6" />
-  <Project Path="src/ServiceName.Infrastructure/ServiceName.Infrastructure.csproj" Id="dcde21f8-9b83-4254-8ccb-d90c08acf8dd" />
-  <Project Path="tests/ServiceName.UnitTest/ServiceName.UnitTests.csproj" Id="6bd5c821-aedb-4de8-b688-16dc5214b4ee" />
-  <Project Path="src/ServiceName.Api/ServiceName.Api.csproj" />
-</Solution>

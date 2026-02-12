@@ -1,8 +1,10 @@
 services:
 
   api:
-    build: .
-    image: microservice-template
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    image: service-name
     ports:
       - "5000:8080"
     env_file:

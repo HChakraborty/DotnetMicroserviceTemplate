@@ -3,7 +3,7 @@
 
 A reusable starter template for building .NET microservices using Clean Architecture.
 
-This project provides a structured base for creating new services with consistent layering and patterns.
+This project provides a structured base for creating new services with consistent layering and patterns. It is a minimalistic design intended to help better understand the structure without overwhelming you with too many features. It serves as a starting point.
 
 ## Features
 
@@ -13,6 +13,7 @@ This project provides a structured base for creating new services with consisten
 - Global exception handling middleware
 - CancellationToken support
 - Dependency Injection configuration
+- Authentication and Authorization
 - Unit Tests
 
 ## Project Structure
@@ -35,10 +36,36 @@ ServiceName
   │ ├─ Repositories
   │ └─ Migrations
   tests/
-  └─ ServiceName.UnitTests
-    ├─ Controllers
-    ├─ Repository
-    └─ Services
+  ├─ ServiceName.UnitTests
+  │ ├─ Controllers
+  │ ├─ Repository
+  │ └─ Services
+  deployment/
+```
+```text
+AuthService
+└─src/
+  ├─ AuthService.Api
+  │ ├─ Controllers
+  │ ├─ Middlewares
+  │ └─ Extensions
+  ├─ AuthService.Application
+  │ ├─ DTOs
+  │ ├─ Interfaces
+  │ └─ Services
+  ├─ AuthService.Domain
+  │ └─ Entities
+  ├─ AuthService.Infrastructure
+  │ ├─ Persistence
+  │ ├─ Repositories
+  │ ├─ Security
+  │ └─ Migrations
+  tests/
+  ├─ AuthService.UnitTests
+  │ ├─ Controllers
+  │ ├─ Repository
+  │ └─ Services
+  deployment/
 ```
 
 ## Prerequisites

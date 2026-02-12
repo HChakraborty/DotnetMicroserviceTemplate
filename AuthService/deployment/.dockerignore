@@ -15,9 +15,6 @@
 .DS_Store
 Thumbs.db
 
-# Node / frontend (if added later)
-**/node_modules/
-
 # Docker files (optional)
 docker-compose.yml
 Dockerfile

@@ -17,7 +17,7 @@ COPY src/ServiceName.Infrastructure/*.csproj src/ServiceName.Infrastructure/
 RUN dotnet restore src/ServiceName.Api/ServiceName.Api.csproj
 
 # Copy full source
-COPY src/ ./src/
+COPY src ./src/
 
 # Publish
 RUN dotnet publish src/ServiceName.Api/ServiceName.Api.csproj \
