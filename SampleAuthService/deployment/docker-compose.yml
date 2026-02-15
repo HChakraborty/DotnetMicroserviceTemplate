@@ -1,16 +1,16 @@
 services:
 
-  api:
+  auth-api:
     build:
       context: ..
       dockerfile: deployment/Dockerfile
-    image: service-name
+    image: sample-auth-service
     ports:
-      - "5000:8080"
+      - "5001:8080"
     env_file:
       - .env
     depends_on:
-      - db
+      - auth-db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -18,15 +18,15 @@ services:
       retries: 3
       start_period: 20s
 
-  db:
+  auth-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Dev@123456
     ports:
-      - "1433:1433"
+      - "1434:1433"
     volumes:
-      - sql_data:/var/opt/mssql
+      - auth_sql_data:/var/opt/mssql
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Dev@123456 -Q 'SELECT 1' || exit 1"]
       interval: 30s
@@ -35,4 +35,4 @@ services:
       start_period: 30s
 
 volumes:
-  sql_data:
+  auth_sql_data:

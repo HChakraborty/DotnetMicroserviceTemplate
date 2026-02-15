@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ServiceName.Application.DTO;
 using ServiceName.Application.Interfaces;
 
 namespace ServiceName.Controllers;
 
+[Authorize]
 [ApiController]
-[Route("api/sample")]
+[Route("api/v1/sample")]
 public class SampleController: ControllerBase
 {
     private readonly ISampleService _service;
@@ -15,6 +17,7 @@ public class SampleController: ControllerBase
         _service = service;
     }
 
+    [Authorize(Policy = "ReadPolicy")]
     [HttpGet("getAllData")]
     public async Task<IActionResult> GetAllAsync()
     {
@@ -22,6 +25,7 @@ public class SampleController: ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "ReadPolicy")]
     [HttpGet("getId/{id}")]
     public async Task<IActionResult> GetByIdAsync(Guid id)
     {
@@ -33,6 +37,7 @@ public class SampleController: ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "WritePolicy")]
     [HttpPost("addData")]
     public async Task<IActionResult> AddAsync(SampleDTO dto)
     {
@@ -40,6 +45,7 @@ public class SampleController: ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "WritePolicy")]
     [HttpPut("updateData")]
     public async Task<IActionResult> UpdateAsync(SampleDTO dto)
     {
@@ -47,6 +53,7 @@ public class SampleController: ControllerBase
         return Ok();
     }
 
+    [Authorize(Policy = "AdminPolicy")]
     [HttpDelete("deleteData/{id}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
