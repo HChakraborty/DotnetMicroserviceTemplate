@@ -3,7 +3,7 @@ using SampleAuthService.Domain.Enums;
 
 namespace SampleAuthService.Application.DTO;
 
-public class RegisterDto
+public class RegisterUserDto
 {
     [Required]
     [EmailAddress]

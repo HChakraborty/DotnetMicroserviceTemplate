@@ -4,10 +4,9 @@ namespace SampleAuthService.Application.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User?> GetByEmailAsync(string email);
-
+    Task<User?> GetUserByEmailAsync(string email);
     Task<User?> GetByIdAsync(Guid id);
-
-    Task AddAsync(User user);
-    Task UpdateAsync(User user);
+    Task AddUserAsync(User user);
+    Task UpdateUserAsync(User user);
+    Task DeleteUserAsync(User user);
 }

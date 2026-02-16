@@ -1,0 +1,98 @@
+﻿using FluentAssertions;
+using Moq;
+using SampleAuthService.Application.DTO;
+using SampleAuthService.Application.Interfaces;
+using SampleAuthService.Application.Services;
+using SampleAuthService.Domain.Entities;
+using SampleAuthService.Domain.Enums;
+using Xunit;
+
+namespace SampleAuthService.UnitTests.Services;
+
+public class TokenServiceTests
+{
+    private readonly Mock<IUserRepository> _userRepoMock;
+    private readonly Mock<IJwtService> _jwtMock;
+    private readonly TokenService _service;
+
+    public TokenServiceTests()
+    {
+        _userRepoMock = new Mock<IUserRepository>();
+        _jwtMock = new Mock<IJwtService>();
+
+        _service = new TokenService(
+            _userRepoMock.Object,
+            _jwtMock.Object);
+    }
+
+    [Fact]
+    public async Task GenerateToken_Should_Return_Token_When_Valid()
+    {
+        var password = "password123";
+        var hash = BCrypt.Net.BCrypt.HashPassword(password);
+
+        var user = new User("test@test.com", hash, UserRole.ReadUser);
+
+        _userRepoMock
+            .Setup(x => x.GetUserByEmailAsync("test@test.com"))
+            .ReturnsAsync(user);
+
+        var tokenResponse = new TokenResponseDto
+        {
+            AccessToken = "fake-jwt"
+        };
+
+        _jwtMock
+            .Setup(x => x.GenerateToken(user))
+            .Returns("fake-jwt");
+
+        var dto = new TokenRequestDto
+        {
+            Email = "test@test.com",
+            Password = password
+        };
+
+        var result = await _service.GenerateTokenAsync(dto);
+
+        result!.AccessToken.Should().Be("fake-jwt");
+    }
+
+    [Fact]
+    public async Task GenerateToken_Should_Throw_When_User_Not_Found()
+    {
+        _userRepoMock
+            .Setup(x => x.GetUserByEmailAsync("missing@test.com"))
+            .ReturnsAsync((User?)null);
+
+        var dto = new TokenRequestDto
+        {
+            Email = "missing@test.com",
+            Password = "pass"
+        };
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _service.GenerateTokenAsync(dto));
+    }
+
+    [Fact]
+    public async Task GenerateToken_Should_Throw_When_Invalid_Password()
+    {
+        var user = new User(
+            "test@test.com",
+            BCrypt.Net.BCrypt.HashPassword("correct"),
+            UserRole.ReadUser);
+
+        _userRepoMock
+            .Setup(x => x.GetUserByEmailAsync("test@test.com"))
+            .ReturnsAsync(user);
+
+        var dto = new TokenRequestDto
+        {
+            Email = "test@test.com",
+            Password = "wrong"
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.GenerateTokenAsync(dto));
+    }
+}

@@ -29,7 +29,7 @@ public class UserRepositoryTests
             BCrypt.Net.BCrypt.HashPassword("password"),
             UserRole.ReadUser);
 
-        await repo.AddAsync(user);
+        await repo.AddUserAsync(user);
 
         context.Users.Count().Should().Be(1);
     }
@@ -49,7 +49,7 @@ public class UserRepositoryTests
 
         var repo = new UserRepository(context);
 
-        var result = await repo.GetByEmailAsync("find@test.com");
+        var result = await repo.GetUserByEmailAsync("find@test.com");
 
         result.Should().NotBeNull();
         result!.Email.Should().Be("find@test.com");
@@ -61,7 +61,7 @@ public class UserRepositoryTests
         using var context = CreateDbContext();
         var repo = new UserRepository(context);
 
-        var result = await repo.GetByEmailAsync("missing@test.com");
+        var result = await repo.GetUserByEmailAsync("missing@test.com");
 
         result.Should().BeNull();
     }
@@ -105,7 +105,7 @@ public class UserRepositoryTests
         user.ChangePassword(
             BCrypt.Net.BCrypt.HashPassword("newpass"));
 
-        await repo.UpdateAsync(user);
+        await repo.UpdateUserAsync(user);
 
         var updated = await context.Users
             .FirstOrDefaultAsync(x => x.Email == "update@test.com");
@@ -113,4 +113,28 @@ public class UserRepositoryTests
         BCrypt.Net.BCrypt.Verify("newpass", updated!.PasswordHash)
             .Should().BeTrue();
     }
+
+    [Fact]
+    public async Task DeleteUserAsync_Should_Remove_User_From_Database()
+    {
+        // Arrange
+        using var context = CreateDbContext();
+        var repo = new UserRepository(context);
+
+        var user = new User(
+            "delete@test.com",
+            BCrypt.Net.BCrypt.HashPassword("password"),
+            UserRole.ReadUser);
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        // Act
+        await repo.DeleteUserAsync(user);
+
+        // Assert
+        var exists = context.Users.Any();
+        exists.Should().BeFalse();
+    }
+
 }
