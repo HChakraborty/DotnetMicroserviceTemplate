@@ -1,24 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceName.Application.Interfaces;
-using ServiceName.Application.Services;
 using ServiceName.Domain.Entities;
 using ServiceName.Infrastructure.Persistence;
 using ServiceName.Infrastructure.Repositories;
 
-namespace ServiceName.Extensions;
+namespace ServiceName.Api.Extensions;
 
-public static class ServiceCollectionExtensions
+public static class InfrastructureServiceExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
-    {
-        services.AddScoped<ISampleService, SampleService>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration config)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         var connectionString = config.GetConnectionString("Default");
 

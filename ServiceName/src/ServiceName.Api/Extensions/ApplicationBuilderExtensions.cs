@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SampleAuthService.Infrastructure.Persistence;
+using ServiceName.Infrastructure.Persistence;
+
+namespace ServiceName.Api.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
@@ -11,7 +13,7 @@ public static class ApplicationBuilderExtensions
 
         var services = scope.ServiceProvider;
         var logger = services.GetRequiredService<ILogger<Program>>();
-        var db = services.GetRequiredService<AuthDbContext>();
+        var db = services.GetRequiredService<AppDbContext>();
 
         const int maxRetries = 5;
 

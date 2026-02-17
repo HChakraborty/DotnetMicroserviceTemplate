@@ -1,55 +1,56 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using ServiceName.Domain.Entities;
 using ServiceName.Application.Interfaces;
+using ServiceName.Domain.Entities;
 using ServiceName.Infrastructure.Persistence;
 using ServiceName.Infrastructure.Repositories;
 
-
 namespace ServiceName.UnitTests.Repositories;
 
-public class SampleRepositoryTests
+public class SampleRepositoryTests : IAsyncLifetime
 {
-    private static AppDbContext CreateDbContext()
+    private SqliteConnection _connection = null!;
+    private AppDbContext _context = null!;
+    private IRepository<SampleEntity> _repo = null!;
+
+    public async Task InitializeAsync()
     {
-        var connection = new SqliteConnection("Filename=:memory:");
-        connection.Open();
+        _connection = new SqliteConnection("Filename=:memory:");
+        await _connection.OpenAsync();
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(connection)
+            .UseSqlite(_connection)
             .Options;
 
-        var context = new AppDbContext(options);
+        _context = new AppDbContext(options);
 
-        context.Database.EnsureCreated();
+        await _context.Database.EnsureCreatedAsync();
 
-        return context;
+        _repo = new SampleRepository(_context);
     }
 
-    private static IRepository<SampleEntity> CreateRepository(AppDbContext context)
+    public async Task DisposeAsync()
     {
-        return new SampleRepository(context);
+        await _context.DisposeAsync();
+        await _connection.DisposeAsync();
     }
 
     [Fact]
     public async Task AddAsync_Should_Save_Entity()
     {
         // Arrange
-        using var context = CreateDbContext();
-        var repo = CreateRepository(context);
-
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
             name = "Test Name"
         };
 
+        await _repo.AddAsync(entity);
+
         // Act
-        await repo.AddAsync(entity);
+        var saved = await _context.SampleEntities.FirstOrDefaultAsync();
 
         // Assert
-        var saved = await context.SampleEntities.FirstOrDefaultAsync();
-
         Assert.NotNull(saved);
         Assert.Equal("Test Name", saved!.name);
     }
@@ -58,19 +59,15 @@ public class SampleRepositoryTests
     public async Task GetAllAsync_Should_Return_All_Entities()
     {
         // Arrange
-        using var context = CreateDbContext();
-
-        context.SampleEntities.AddRange(
+        _context.SampleEntities.AddRange(
             new SampleEntity { Id = Guid.NewGuid(), name = "One" },
             new SampleEntity { Id = Guid.NewGuid(), name = "Two" }
         );
 
-        await context.SaveChangesAsync();
-
-        var repo = CreateRepository(context);
+        await _context.SaveChangesAsync();
 
         // Act
-        var result = await repo.GetAllAsync();
+        var result = await _repo.GetAllAsync();
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -80,21 +77,17 @@ public class SampleRepositoryTests
     public async Task GetByIdAsync_Should_Return_Entity_When_Found()
     {
         // Arrange
-        using var context = CreateDbContext();
-
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
             name = "Find Me"
         };
 
-        context.SampleEntities.Add(entity);
-        await context.SaveChangesAsync();
-
-        var repo = CreateRepository(context);
+        _context.SampleEntities.Add(entity);
+        await _context.SaveChangesAsync();
 
         // Act
-        var result = await repo.GetByIdAsync(entity.Id);
+        var result = await _repo.GetByIdAsync(entity.Id);
 
         // Assert
         Assert.NotNull(result);
@@ -105,12 +98,10 @@ public class SampleRepositoryTests
     public async Task GetByIdAsync_Should_Return_Null_When_Not_Found()
     {
         // Arrange
-        using var context = CreateDbContext();
-
-        var repo = CreateRepository(context);
+        var id = Guid.NewGuid();
 
         // Act
-        var result = await repo.GetByIdAsync(Guid.NewGuid());
+        var result = await _repo.GetByIdAsync(id);
 
         // Assert
         Assert.Null(result);
@@ -120,27 +111,23 @@ public class SampleRepositoryTests
     public async Task UpdateAsync_Should_Update_Entity()
     {
         // Arrange
-        using var context = CreateDbContext();
-
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
             name = "Old Name"
         };
 
-        context.SampleEntities.Add(entity);
-        await context.SaveChangesAsync();
-
-        var repo = CreateRepository(context);
+        _context.SampleEntities.Add(entity);
+        await _context.SaveChangesAsync();
 
         entity.name = "New Name";
 
+        await _repo.UpdateAsync(entity);
+
         // Act
-        await repo.UpdateAsync(entity);
+        var updated = await _context.SampleEntities.FirstAsync();
 
         // Assert
-        var updated = await context.SampleEntities.FirstAsync();
-
         Assert.Equal("New Name", updated.name);
     }
 
@@ -148,25 +135,21 @@ public class SampleRepositoryTests
     public async Task DeleteByIdAsync_Should_Remove_Entity_When_Found()
     {
         // Arrange
-        using var context = CreateDbContext();
-
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
             name = "Delete Me"
         };
 
-        context.SampleEntities.Add(entity);
-        await context.SaveChangesAsync();
+        _context.SampleEntities.Add(entity);
+        await _context.SaveChangesAsync();
 
-        var repo = CreateRepository(context);
+        await _repo.DeleteByIdAsync(entity.Id);
 
         // Act
-        await repo.DeleteByIdAsync(entity.Id);
+        var deleted = await _context.SampleEntities.FirstOrDefaultAsync();
 
         // Assert
-        var deleted = await context.SampleEntities.FirstOrDefaultAsync();
-
         Assert.Null(deleted);
     }
 
@@ -174,16 +157,14 @@ public class SampleRepositoryTests
     public async Task DeleteByIdAsync_Should_Do_Nothing_When_Not_Found()
     {
         // Arrange
-        using var context = CreateDbContext();
+        var id = Guid.NewGuid();
 
-        var repo = CreateRepository(context);
+        await _repo.DeleteByIdAsync(id);
 
         // Act
-        await repo.DeleteByIdAsync(Guid.NewGuid());
+        var count = await _context.SampleEntities.CountAsync();
 
         // Assert
-        var count = await context.SampleEntities.CountAsync();
-
         Assert.Equal(0, count);
     }
 }

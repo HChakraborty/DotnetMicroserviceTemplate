@@ -14,7 +14,6 @@ public class SampleServiceTests
     public SampleServiceTests()
     {
         _repoMock = new Mock<IRepository<SampleEntity>>();
-
         _service = new SampleService(_repoMock.Object);
     }
 
@@ -29,7 +28,7 @@ public class SampleServiceTests
         };
 
         _repoMock
-            .Setup(r => r.GetAllAsync(default))
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(entities);
 
         // Act
@@ -37,7 +36,6 @@ public class SampleServiceTests
 
         // Assert
         Assert.Equal(2, result.Count);
-
         Assert.Equal("One", result[0].Name);
         Assert.Equal("Two", result[1].Name);
     }
@@ -55,11 +53,11 @@ public class SampleServiceTests
         };
 
         _repoMock
-            .Setup(r => r.GetByIdAsync(id, default))
+            .Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(entity);
 
         // Act
-        var result = await _service.GetAsync(id);
+        var result = await _service.GetByIdAsync(id);
 
         // Assert
         Assert.NotNull(result);
@@ -74,11 +72,11 @@ public class SampleServiceTests
         var id = Guid.NewGuid();
 
         _repoMock
-            .Setup(r => r.GetByIdAsync(id, default))
+            .Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync((SampleEntity?)null);
 
         // Act
-        var result = await _service.GetAsync(id);
+        var result = await _service.GetByIdAsync(id);
 
         // Assert
         Assert.Null(result);
@@ -96,7 +94,7 @@ public class SampleServiceTests
         SampleEntity? savedEntity = null;
 
         _repoMock
-            .Setup(r => r.AddAsync(It.IsAny<SampleEntity>(), default))
+            .Setup(r => r.AddAsync(It.IsAny<SampleEntity>(), It.IsAny<CancellationToken>()))
             .Callback<SampleEntity, CancellationToken>((e, _) =>
             {
                 savedEntity = e;
@@ -106,11 +104,11 @@ public class SampleServiceTests
         // Act
         await _service.AddAsync(dto);
 
-        // Assert
         _repoMock.Verify(
-            r => r.AddAsync(It.IsAny<SampleEntity>(), default),
+            r => r.AddAsync(It.IsAny<SampleEntity>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
+        // Assert
         Assert.NotNull(savedEntity);
         Assert.Equal("New Item", savedEntity!.name);
         Assert.NotEqual(Guid.Empty, savedEntity.Id);
@@ -131,7 +129,7 @@ public class SampleServiceTests
         SampleEntity? updated = null;
 
         _repoMock
-            .Setup(r => r.UpdateAsync(It.IsAny<SampleEntity>(), default))
+            .Setup(r => r.UpdateAsync(It.IsAny<SampleEntity>(), It.IsAny<CancellationToken>()))
             .Callback<SampleEntity, CancellationToken>((e, _) =>
             {
                 updated = e;
@@ -141,11 +139,11 @@ public class SampleServiceTests
         // Act
         await _service.UpdateAsync(dto);
 
-        // Assert
         _repoMock.Verify(
-            r => r.UpdateAsync(It.IsAny<SampleEntity>(), default),
+            r => r.UpdateAsync(It.IsAny<SampleEntity>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
+        // Assert
         Assert.NotNull(updated);
         Assert.Equal(id, updated!.Id);
         Assert.Equal("Updated", updated.name);
@@ -158,15 +156,15 @@ public class SampleServiceTests
         var id = Guid.NewGuid();
 
         _repoMock
-            .Setup(r => r.DeleteByIdAsync(id, default))
+            .Setup(r => r.DeleteByIdAsync(id, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        await _service.DeleteAsync(id);
+        await _service.DeleteByIdAsync(id);
 
         // Assert
         _repoMock.Verify(
-            r => r.DeleteByIdAsync(id, default),
+            r => r.DeleteByIdAsync(id, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

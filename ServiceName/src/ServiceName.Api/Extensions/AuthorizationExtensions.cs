@@ -1,6 +1,6 @@
-﻿using SampleAuthService.Domain.Enums;
+﻿using ServiceName.Domain.Enums;
 
-namespace SampleAuthService.Api.Extensions;
+namespace ServiceName.Api.Extensions;
 
 public static class AuthorizationExtensions
 {

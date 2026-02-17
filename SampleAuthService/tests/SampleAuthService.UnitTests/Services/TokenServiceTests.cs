@@ -28,13 +28,14 @@ public class TokenServiceTests
     [Fact]
     public async Task GenerateToken_Should_Return_Token_When_Valid()
     {
+        // Arrange
         var password = "password123";
         var hash = BCrypt.Net.BCrypt.HashPassword(password);
 
         var user = new User("test@test.com", hash, UserRole.ReadUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("test@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("test@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var tokenResponse = new TokenResponseDto
@@ -60,8 +61,9 @@ public class TokenServiceTests
     [Fact]
     public async Task GenerateToken_Should_Throw_When_User_Not_Found()
     {
+        // Arrange
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("missing@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("missing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var dto = new TokenRequestDto
@@ -77,13 +79,14 @@ public class TokenServiceTests
     [Fact]
     public async Task GenerateToken_Should_Throw_When_Invalid_Password()
     {
+        // Arrange
         var user = new User(
             "test@test.com",
             BCrypt.Net.BCrypt.HashPassword("correct"),
             UserRole.ReadUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("test@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("test@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var dto = new TokenRequestDto
@@ -92,6 +95,7 @@ public class TokenServiceTests
             Password = "wrong"
         };
 
+        // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
             () => _service.GenerateTokenAsync(dto));
     }

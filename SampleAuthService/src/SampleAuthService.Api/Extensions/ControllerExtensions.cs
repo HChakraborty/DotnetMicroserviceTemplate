@@ -9,6 +9,7 @@ public static class ControllerExtensions
         services.AddControllers()
         .AddJsonOptions(options =>
         {
+            // Serialize enums as strings instead of integers to make API contracts human-readable
             options.JsonSerializerOptions.Converters
                 .Add(new JsonStringEnumConverter());
         });

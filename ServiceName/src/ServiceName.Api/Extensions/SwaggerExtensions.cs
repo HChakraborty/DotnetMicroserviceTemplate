@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace SampleAuthService.Api.Extensions;
+namespace ServiceName.Api.Extensions;
 
 public static class SwaggerExtensions
 {
@@ -10,7 +10,7 @@ public static class SwaggerExtensions
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "SampleAuthService API",
+                Title = "ServiceName API",
                 Version = "v1"
             });
 

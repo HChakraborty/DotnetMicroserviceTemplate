@@ -10,7 +10,9 @@ public static class RateLimitingExtensions
         services.AddRateLimiter(options => 
         { 
             options.AddFixedWindowLimiter("global", limiterOptions => 
-            { 
+            {
+                // Limits are for template usage and can be adjust based on traffic patterns,
+                // SLA requirements, and abuse protection needs of the business domain
                 limiterOptions.PermitLimit = 100; 
                 limiterOptions.Window = TimeSpan.FromMinutes(1); 
                 limiterOptions.QueueLimit = 0; 

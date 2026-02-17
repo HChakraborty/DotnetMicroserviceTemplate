@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using ServiceName.Api.Controllers;
 using ServiceName.Application.DTO;
 using ServiceName.Application.Interfaces;
-using ServiceName.Controllers;
 
 namespace ServiceName.UnitTests.Controllers;
 
@@ -14,7 +14,6 @@ public class SampleControllerTests
     public SampleControllerTests()
     {
         _mockService = new Mock<ISampleService>();
-
         _controller = new SampleController(_mockService.Object);
     }
 
@@ -35,11 +34,10 @@ public class SampleControllerTests
         // Act
         var result = await _controller.GetAllAsync();
 
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-
         var returnedData = Assert.IsAssignableFrom<IEnumerable<SampleDTO>>(okResult.Value);
 
+        // Assert
         Assert.Equal(2, returnedData.Count());
     }
 
@@ -48,21 +46,19 @@ public class SampleControllerTests
     {
         // Arrange
         var id = Guid.NewGuid();
-
         var dto = new SampleDTO();
 
         _mockService
-            .Setup(x => x.GetAsync(id))
+            .Setup(x => x.GetByIdAsync(id))
             .ReturnsAsync(dto);
 
         // Act
         var result = await _controller.GetByIdAsync(id);
 
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-
         var returnedDto = Assert.IsType<SampleDTO>(okResult.Value);
-
+        
+        // Assert
         Assert.Equal(dto, returnedDto);
     }
 
@@ -73,7 +69,7 @@ public class SampleControllerTests
         var id = Guid.NewGuid();
 
         _mockService
-            .Setup(x => x.GetAsync(id))
+            .Setup(x => x.GetByIdAsync(id))
             .ReturnsAsync((SampleDTO?)null);
 
         // Act
@@ -98,7 +94,6 @@ public class SampleControllerTests
 
         // Assert
         Assert.IsType<OkResult>(result);
-
         _mockService.Verify(x => x.AddAsync(dto), Times.Once);
     }
 
@@ -106,20 +101,26 @@ public class SampleControllerTests
     public async Task UpdateAsync_Should_Call_Service_And_Return_Ok()
     {
         // Arrange
-        var dto = new SampleDTO();
+        var id = Guid.NewGuid();
+
+        var dto = new SampleDTO
+        {
+            Id = id
+        };
 
         _mockService
-            .Setup(x => x.UpdateAsync(dto))
+            .Setup(x => x.UpdateAsync(It.IsAny<SampleDTO>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.UpdateAsync(dto);
+        var result = await _controller.UpdateAsync(id, dto);
 
         // Assert
         Assert.IsType<OkResult>(result);
 
-        _mockService.Verify(x => x.UpdateAsync(dto), Times.Once);
+        _mockService.Verify(x => x.UpdateAsync(It.Is<SampleDTO>(d => d.Id == id)), Times.Once);
     }
+
 
     [Fact]
     public async Task DeleteAsync_Should_Call_Service_And_Return_Ok()
@@ -128,15 +129,14 @@ public class SampleControllerTests
         var id = Guid.NewGuid();
 
         _mockService
-            .Setup(x => x.DeleteAsync(id))
+            .Setup(x => x.DeleteByIdAsync(id))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.DeleteAsync(id);
+        var result = await _controller.DeleteByIdAsync(id);
 
         // Assert
         Assert.IsType<OkResult>(result);
-
-        _mockService.Verify(x => x.DeleteAsync(id), Times.Once);
+        _mockService.Verify(x => x.DeleteByIdAsync(id), Times.Once);
     }
 }

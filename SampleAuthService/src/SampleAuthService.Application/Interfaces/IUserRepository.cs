@@ -4,9 +4,9 @@ namespace SampleAuthService.Application.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User?> GetUserByEmailAsync(string email);
-    Task<User?> GetByIdAsync(Guid id);
-    Task AddUserAsync(User user);
-    Task UpdateUserAsync(User user);
-    Task DeleteUserAsync(User user);
+    Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task AddUserAsync(User user, CancellationToken cancellationToken = default);
+    Task UpdateUserAsync(User user, CancellationToken cancellationToken = default);
+    Task DeleteUserAsync(User user, CancellationToken cancellationToken = default);
 }

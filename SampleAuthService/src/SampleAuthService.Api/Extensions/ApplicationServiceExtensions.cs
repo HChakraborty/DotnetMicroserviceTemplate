@@ -11,7 +11,6 @@ public static class ApplicationServiceExtensions
     {
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IJwtService, JwtService>();
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITokenService, TokenService>();
 
         return services;

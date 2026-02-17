@@ -24,6 +24,7 @@ public class UserControllerTests
     [Fact]
     public async Task RegisterUserAsync_Should_Return_Ok()
     {
+        // Arrange
         var dto = new RegisterUserDto
         {
             Email = "new@test.com",
@@ -34,8 +35,10 @@ public class UserControllerTests
             .Setup(x => x.RegisterUserAsync(dto))
             .Returns(Task.CompletedTask);
 
+        // Act
         var result = await _controller.RegisterUserAsync(dto);
 
+        // Assert
         result.Should().BeOfType<OkObjectResult>();
 
         _userMock.Verify(x => x.RegisterUserAsync(dto), Times.Once);
@@ -44,6 +47,7 @@ public class UserControllerTests
     [Fact]
     public async Task ResetPasswordRequestAsync_Should_Return_Ok()
     {
+        // Arrange
         var dto = new ResetPasswordDto
         {
             Email = "user@test.com",
@@ -54,8 +58,10 @@ public class UserControllerTests
             .Setup(x => x.ResetPasswordRequestAsync(dto))
             .ReturnsAsync(true);
 
+        // Act
         var result = await _controller.ResetPasswordRequestAsync(dto);
 
+        // Assert
         result.Should().BeOfType<OkObjectResult>();
 
         _userMock.Verify(x => x.ResetPasswordRequestAsync(dto), Times.Once);
@@ -83,12 +89,14 @@ public class UserControllerTests
     [Fact]
     public async Task DeleteUserAsync_Should_Throw_When_Service_Fails()
     {
+        // Arrange
         var email = "missing@test.com";
 
         _userMock
             .Setup(x => x.DeleteUserAsync(email))
             .ThrowsAsync(new KeyNotFoundException());
 
+        // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _controller.DeleteUserAsync(email));
     }
@@ -96,6 +104,7 @@ public class UserControllerTests
     [Fact]
     public async Task GetUserAsync_Should_Return_User_When_WriteUser_Accesses_ReadUser()
     {
+        // Arrange
         var targetEmail = "read@test.com";
 
         var dto = new GetUserDto
@@ -119,8 +128,10 @@ public class UserControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
+        // Act
         var result = await _controller.GetUserByEmailAsync(targetEmail);
 
+        // Assert
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
 
         var returned = ok.Value.Should().BeOfType<GetUserDto>().Subject;
@@ -136,9 +147,9 @@ public class UserControllerTests
 
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-        new Claim(ClaimTypes.Email, "read@test.com"),
-        new Claim(ClaimTypes.Role, UserRole.ReadUser.ToString())
-    }, "mock"));
+            new Claim(ClaimTypes.Email, "read@test.com"),
+            new Claim(ClaimTypes.Role, UserRole.ReadUser.ToString())
+        },  "mock"));
 
         _controller.ControllerContext = new ControllerContext
         {
@@ -172,7 +183,7 @@ public class UserControllerTests
         {
         new Claim(ClaimTypes.Email, "writer@test.com"),
         new Claim(ClaimTypes.Role, UserRole.WriteUser.ToString())
-    }, "mock"));
+        }, "mock"));
 
         _controller.ControllerContext = new ControllerContext
         {
@@ -189,6 +200,7 @@ public class UserControllerTests
     [Fact]
     public async Task GetUserAsync_Should_Return_Unauthorized_When_No_User()
     {
+        // Arrange
         var targetEmail = "read@test.com";
 
         _controller.ControllerContext = new ControllerContext
@@ -196,8 +208,10 @@ public class UserControllerTests
             HttpContext = new DefaultHttpContext() // no user
         };
 
+        // Act
         var result = await _controller.GetUserByEmailAsync(targetEmail);
 
+        // Assert
         result.Should().BeOfType<ForbidResult>();
     }
 }

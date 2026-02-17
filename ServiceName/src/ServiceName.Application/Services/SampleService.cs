@@ -23,7 +23,7 @@ public class SampleService: ISampleService
         }).ToList();
     }
 
-    public async Task<SampleDTO?> GetAsync(Guid id)
+    public async Task<SampleDTO?> GetByIdAsync(Guid id)
     {
         var entity = await _repository.GetByIdAsync(id);
         if (entity == null) return null;
@@ -54,7 +54,7 @@ public class SampleService: ISampleService
         await _repository.UpdateAsync(entity);
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteByIdAsync(Guid id)
     {
         await _repository.DeleteByIdAsync(id);
     }

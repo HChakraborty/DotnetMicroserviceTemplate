@@ -16,6 +16,7 @@ public class SampleRepository: IRepository<SampleEntity>
 
     public async Task<IReadOnlyList<SampleEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        // Pass cancellation token to allow request aborts or shutdown signals
         return await _context.SampleEntities.ToListAsync(cancellationToken);
     }
 
@@ -26,7 +27,7 @@ public class SampleRepository: IRepository<SampleEntity>
 
     public async Task AddAsync(SampleEntity entity, CancellationToken cancellationToken = default)
     {
-        await _context.SampleEntities.AddAsync(entity, cancellationToken);
+        await _context.SampleEntities.AddAsync(entity);
         await _context.SaveChangesAsync(cancellationToken);
     }
 

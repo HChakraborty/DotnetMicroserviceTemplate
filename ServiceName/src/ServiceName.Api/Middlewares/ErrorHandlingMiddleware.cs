@@ -1,45 +1,78 @@
-﻿namespace ServiceName.Middlewares;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Net;
+
+namespace ServiceName.Api.Middlewares;
 
 public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
-    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+    private readonly IHostEnvironment _env;
+
+    public ErrorHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ErrorHandlingMiddleware> logger,
+        IHostEnvironment env)
     {
         _next = next;
         _logger = logger;
+        _env = env;
     }
+
+    // Global middleware to handle exceptions and return standardized error responses
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
             await _next(context);
         }
+        catch (OperationCanceledException)
+        {
+            // Client disconnected or request cancelled
+            context.Response.StatusCode = StatusCodes.Status499ClientClosedRequest;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred.");
-            await HandleExceptionsAsync(context, ex);
+            _logger.LogError(ex, "Unhandled exception occurred.");
+
+            await HandleExceptionAsync(context, ex);
         }
     }
 
-    private static Task HandleExceptionsAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var statusCode = exception switch
         {
-            ArgumentException => StatusCodes.Status400BadRequest,
-            KeyNotFoundException => StatusCodes.Status404NotFound,
-            _ => StatusCodes.Status500InternalServerError
+            ArgumentException => HttpStatusCode.BadRequest,
+            KeyNotFoundException => HttpStatusCode.NotFound,
+            UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+            _ => HttpStatusCode.InternalServerError
         };
 
-        var response = new
+        var problem = new ProblemDetails
         {
-            status = (int)statusCode,
-            error = exception.Message
+            Status = (int)statusCode,
+            Title = GetTitle(statusCode),
+            Detail = _env.IsDevelopment() ? exception.Message : "An unexpected error occurred.",
+            Instance = context.Request.Path
         };
 
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)statusCode;
+        problem.Extensions["traceId"] = context.TraceIdentifier;
 
-        return context.Response.WriteAsJsonAsync(response);
+        context.Response.ContentType = "application/problem+json";
+        context.Response.StatusCode = problem.Status.Value;
+
+        await context.Response.WriteAsJsonAsync(problem);
+    }
+
+    private static string GetTitle(HttpStatusCode statusCode)
+    {
+        return statusCode switch
+        {
+            HttpStatusCode.BadRequest => "Bad Request",
+            HttpStatusCode.NotFound => "Resource Not Found",
+            HttpStatusCode.Unauthorized => "Unauthorized",
+            _ => "Internal Server Error"
+        };
     }
 }

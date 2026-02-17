@@ -19,6 +19,7 @@ public static class InfrastructureServiceExtensions
                 "Connection string 'Default' is missing.");
         }
 
+        // Let EF auto-detect migrations from AppDbContext assembly
         services.AddDbContext<AuthDbContext>(options =>
             options.UseSqlServer(
                 connectionString,

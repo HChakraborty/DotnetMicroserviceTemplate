@@ -19,6 +19,7 @@ public class ErrorHandlingMiddleware
         _env = env;
     }
 
+    // Global middleware to handle exceptions and return standardized error responses
     public async Task InvokeAsync(HttpContext context)
     {
         try

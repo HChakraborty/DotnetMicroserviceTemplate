@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using ServiceName.Application.DTO;
 using ServiceName.Application.Interfaces;
 
-namespace ServiceName.Controllers;
+namespace ServiceName.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/v1/sample")]
+[Route("api/v1/samples")]
 public class SampleController: ControllerBase
 {
     private readonly ISampleService _service;
@@ -18,7 +18,7 @@ public class SampleController: ControllerBase
     }
 
     [Authorize(Policy = "ReadPolicy")]
-    [HttpGet("getAllData")]
+    [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
         var result = await _service.GetAllAsync();
@@ -26,10 +26,10 @@ public class SampleController: ControllerBase
     }
 
     [Authorize(Policy = "ReadPolicy")]
-    [HttpGet("getId/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(Guid id)
     {
-        var result = await _service.GetAsync(id);
+        var result = await _service.GetByIdAsync(id);
 
         if (result == null) 
             return NotFound();
@@ -38,7 +38,7 @@ public class SampleController: ControllerBase
     }
 
     [Authorize(Policy = "WritePolicy")]
-    [HttpPost("addData")]
+    [HttpPost]
     public async Task<IActionResult> AddAsync(SampleDTO dto)
     {
         await _service.AddAsync(dto);
@@ -46,18 +46,24 @@ public class SampleController: ControllerBase
     }
 
     [Authorize(Policy = "WritePolicy")]
-    [HttpPut("updateData")]
-    public async Task<IActionResult> UpdateAsync(SampleDTO dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateAsync(Guid id, SampleDTO dto)
     {
+        // Prevent inconsistent updates if client sends mismatched ids
+        if (dto.Id != Guid.Empty && dto.Id != id)
+            return BadRequest("Route id and body id must match.");
+
+        dto.Id = id;
+
         await _service.UpdateAsync(dto);
         return Ok();
     }
 
     [Authorize(Policy = "AdminPolicy")]
-    [HttpDelete("deleteData/{id}")]
-    public async Task<IActionResult> DeleteAsync(Guid id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteByIdAsync(Guid id)
     {
-        await _service.DeleteAsync(id);
+        await _service.DeleteByIdAsync(id);
         return Ok();
     }
 }

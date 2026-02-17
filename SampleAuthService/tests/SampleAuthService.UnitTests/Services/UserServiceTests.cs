@@ -28,8 +28,9 @@ public class UserServiceTests
     [Fact]
     public async Task RegisterUserAsync_Should_Add_User_When_Email_Not_Exists()
     {
+        // Arrange
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("new@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("new@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var dto = new RegisterUserDto
@@ -38,21 +39,24 @@ public class UserServiceTests
             Password = "password"
         };
 
+        // Act
         await _service.RegisterUserAsync(dto);
 
-        _userRepoMock.Verify(x => x.AddUserAsync(It.IsAny<User>()), Times.Once);
+        // Assert
+        _userRepoMock.Verify(x => x.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task RegisterUserAsync_Should_Throw_When_Email_Exists()
     {
+        // Arrange
         var existingUser = new User(
             "existing@test.com",
             BCrypt.Net.BCrypt.HashPassword("pass"),
             UserRole.ReadUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("existing@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("existing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingUser);
 
         var dto = new RegisterUserDto
@@ -61,6 +65,7 @@ public class UserServiceTests
             Password = "password"
         };
 
+        // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
             () => _service.RegisterUserAsync(dto));
     }
@@ -68,13 +73,14 @@ public class UserServiceTests
     [Fact]
     public async Task ResetPasswordRequestAsync_Should_Update_Password_When_User_Exists()
     {
+        // Arrange
         var user = new User(
             "reset@test.com",
             BCrypt.Net.BCrypt.HashPassword("old"),
             UserRole.WriteUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("reset@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("reset@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var dto = new ResetPasswordDto
@@ -83,17 +89,20 @@ public class UserServiceTests
             NewPassword = "newpassword"
         };
 
+        // Act
         var result = await _service.ResetPasswordRequestAsync(dto);
 
+        // Assert
         result.Should().BeTrue();
-        _userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+        _userRepoMock.Verify(x => x.UpdateUserAsync(user, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task ResetPasswordRequestAsync_Should_Throw_When_User_Not_Found()
     {
+        // Arrange
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("missing@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("missing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var dto = new ResetPasswordDto
@@ -102,6 +111,7 @@ public class UserServiceTests
             NewPassword = "pass"
         };
 
+        // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _service.ResetPasswordRequestAsync(dto));
     }
@@ -116,11 +126,11 @@ public class UserServiceTests
             UserRole.WriteUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("delete@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("delete@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         _userRepoMock
-            .Setup(x => x.DeleteUserAsync(user))
+            .Setup(x => x.DeleteUserAsync(user, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -129,7 +139,7 @@ public class UserServiceTests
         // Assert
         result.Should().BeTrue();
 
-        _userRepoMock.Verify(x => x.DeleteUserAsync(user), Times.Once);
+        _userRepoMock.Verify(x => x.DeleteUserAsync(user, It.IsAny<CancellationToken>()), Times.Once);
     }
 
 
@@ -138,7 +148,7 @@ public class UserServiceTests
     {
         // Arrange
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync("missing@test.com"))
+            .Setup(x => x.GetUserByEmailAsync("missing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         // Act & Assert
@@ -146,7 +156,7 @@ public class UserServiceTests
             () => _service.DeleteUserAsync("missing@test.com"));
 
         _userRepoMock.Verify(
-            x => x.DeleteUserAsync(It.IsAny<User>()),
+            x => x.DeleteUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -162,7 +172,7 @@ public class UserServiceTests
             UserRole.ReadUser);
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync(email))
+            .Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         // Act
@@ -181,7 +191,7 @@ public class UserServiceTests
         var email = "missing@test.com";
 
         _userRepoMock
-            .Setup(x => x.GetUserByEmailAsync(email))
+            .Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         // Act & Assert

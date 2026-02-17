@@ -21,6 +21,7 @@ public class UserRepositoryTests
     [Fact]
     public async Task AddAsync_Should_Add_User()
     {
+        // Arrange
         using var context = CreateDbContext();
         var repo = new UserRepository(context);
 
@@ -29,14 +30,17 @@ public class UserRepositoryTests
             BCrypt.Net.BCrypt.HashPassword("password"),
             UserRole.ReadUser);
 
+        // Act
         await repo.AddUserAsync(user);
 
+        // Assert
         context.Users.Count().Should().Be(1);
     }
 
     [Fact]
     public async Task GetByEmailAsync_Should_Return_User_When_Exists()
     {
+        // Arrange
         using var context = CreateDbContext();
 
         var user = new User(
@@ -49,8 +53,10 @@ public class UserRepositoryTests
 
         var repo = new UserRepository(context);
 
+        // Act
         var result = await repo.GetUserByEmailAsync("find@test.com");
 
+        // Assert
         result.Should().NotBeNull();
         result!.Email.Should().Be("find@test.com");
     }
@@ -58,17 +64,21 @@ public class UserRepositoryTests
     [Fact]
     public async Task GetByEmailAsync_Should_Return_Null_When_Not_Exists()
     {
+        // Arrange
         using var context = CreateDbContext();
         var repo = new UserRepository(context);
 
+        // Act
         var result = await repo.GetUserByEmailAsync("missing@test.com");
 
+        // Assert
         result.Should().BeNull();
     }
 
     [Fact]
     public async Task GetByIdAsync_Should_Return_User_When_Exists()
     {
+        // Arrange
         using var context = CreateDbContext();
 
         var user = new User(
@@ -81,8 +91,10 @@ public class UserRepositoryTests
 
         var repo = new UserRepository(context);
 
+        // Act
         var result = await repo.GetByIdAsync(user.Id);
 
+        // Assert
         result.Should().NotBeNull();
         result!.Id.Should().Be(user.Id);
     }
@@ -90,6 +102,7 @@ public class UserRepositoryTests
     [Fact]
     public async Task UpdateAsync_Should_Update_User()
     {
+        // Arrange
         using var context = CreateDbContext();
 
         var user = new User(
@@ -105,11 +118,13 @@ public class UserRepositoryTests
         user.ChangePassword(
             BCrypt.Net.BCrypt.HashPassword("newpass"));
 
+        // Act
         await repo.UpdateUserAsync(user);
 
         var updated = await context.Users
             .FirstOrDefaultAsync(x => x.Email == "update@test.com");
 
+        // Assert
         BCrypt.Net.BCrypt.Verify("newpass", updated!.PasswordHash)
             .Should().BeTrue();
     }
