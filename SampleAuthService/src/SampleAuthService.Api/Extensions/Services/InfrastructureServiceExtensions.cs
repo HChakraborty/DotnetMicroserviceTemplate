@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using SampleAuthService.Application.Interfaces.Messaging;
-using SampleAuthService.Application.Interfaces.Persistence;
+using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Infrastructure.Configuration;
 using SampleAuthService.Infrastructure.Persistence;
 using SampleAuthService.Infrastructure.Repositories;

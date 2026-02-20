@@ -1,6 +1,6 @@
 ﻿using SampleAuthService.Domain.Entities;
 
-namespace SampleAuthService.Application.Interfaces.Security;
+namespace SampleAuthService.Application.Interfaces;
 
 public interface IJwtService
 {

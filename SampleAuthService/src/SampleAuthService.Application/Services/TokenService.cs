@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SampleAuthService.Application.DTO.TokenDto;
 using SampleAuthService.Application.Interfaces;
-using SampleAuthService.Application.Interfaces.Security;
-using SampleAuthService.Application.Interfaces.Services;
 
 namespace SampleAuthService.Application.Services;
 

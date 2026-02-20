@@ -2,8 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SampleAuthService.Application.DTO.UserDto;
 using SampleAuthService.Application.Events;
-using SampleAuthService.Application.Interfaces.Messaging;
-using SampleAuthService.Application.Interfaces.Services;
+using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Domain.Enums;
 using System.Security.Claims;
 

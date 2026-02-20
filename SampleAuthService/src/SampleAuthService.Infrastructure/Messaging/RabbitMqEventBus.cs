@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SampleAuthService.Application.Interfaces.Messaging;
+using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Infrastructure.Configuration;
 using System.Text;
 using System.Text.Json;

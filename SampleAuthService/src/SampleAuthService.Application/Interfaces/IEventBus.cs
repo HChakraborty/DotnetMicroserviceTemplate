@@ -1,4 +1,4 @@
-﻿namespace SampleAuthService.Application.Interfaces.Messaging;
+﻿namespace SampleAuthService.Application.Interfaces;
 
 public interface IEventBus
 {

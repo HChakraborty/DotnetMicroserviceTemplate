@@ -5,8 +5,7 @@ using Moq;
 using SampleAuthService.Api.Controllers;
 using SampleAuthService.Application.DTO;
 using SampleAuthService.Application.DTO.UserDto;
-using SampleAuthService.Application.Interfaces.Messaging;
-using SampleAuthService.Application.Interfaces.Services;
+using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Domain.Enums;
 using System.Security.Claims;
 

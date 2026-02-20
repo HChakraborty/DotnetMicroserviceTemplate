@@ -1,6 +1,6 @@
 ﻿using SampleAuthService.Application.Events;
 using Microsoft.Extensions.Hosting;
-using SampleAuthService.Application.Interfaces.Messaging;
+using SampleAuthService.Application.Interfaces;
 
 namespace SampleAuthService.Infrastructure.BackgroundServices;
 

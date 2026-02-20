@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SampleAuthService.Application.Interfaces.Persistence;
+using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Domain.Entities;
 using SampleAuthService.Infrastructure.Persistence;
 

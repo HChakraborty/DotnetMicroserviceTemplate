@@ -1,7 +1,7 @@
 ﻿using SampleAuthService.Application.DTO.TokenDto;
 using SampleAuthService.Domain.Entities;
 
-namespace SampleAuthService.Application.Interfaces.Services;
+namespace SampleAuthService.Application.Interfaces;
 
 public interface ITokenService
 {

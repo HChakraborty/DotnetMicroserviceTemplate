@@ -1,5 +1,4 @@
-﻿using SampleAuthService.Application.Interfaces.Security;
-using SampleAuthService.Application.Interfaces.Services;
+﻿using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Application.Services;
 using SampleAuthService.Infrastructure.Security;
 

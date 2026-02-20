@@ -2,7 +2,6 @@
 using Moq;
 using SampleAuthService.Application.DTO.UserDto;
 using SampleAuthService.Application.Interfaces;
-using SampleAuthService.Application.Interfaces.Security;
 using SampleAuthService.Application.Services;
 using SampleAuthService.Domain.Entities;
 using SampleAuthService.Domain.Enums;
