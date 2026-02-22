@@ -1,4 +1,4 @@
 ﻿namespace ServiceName.Application.Events;
 
-public record SampleCreatedEvent(string email);
+public record SampleCreatedEvent(Guid Id);
 

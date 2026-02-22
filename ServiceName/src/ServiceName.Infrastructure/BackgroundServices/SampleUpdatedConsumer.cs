@@ -16,7 +16,7 @@ public class SampleUpdatedConsumer : BackgroundService {
     } 
     
     private Task Handle(SampleUpdatedEvent evt) {
-        Console.WriteLine($"Sample update event received: {evt.id}"); 
+        Console.WriteLine($"Sample update event received: {evt.Id}"); 
         return Task.CompletedTask; 
     } 
 }

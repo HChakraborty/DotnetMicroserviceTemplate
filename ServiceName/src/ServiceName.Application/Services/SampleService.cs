@@ -7,55 +7,104 @@ namespace ServiceName.Application.Services;
 public class SampleService: ISampleService
 {
     private readonly IRepository<SampleEntity> _repository;
+    private readonly ICacheService _cache;
 
-    public SampleService(IRepository<SampleEntity> repository)
+    public SampleService(IRepository<SampleEntity> repository, ICacheService cache)
     {
         _repository = repository;
+        _cache = cache;
     }
 
-    public async Task<IReadOnlyList<SampleDTO>> GetAllAsync()
+    // This method intentionally does not use caching.
+    //
+    // Caching large collections (GetAll) can lead to:
+    // - High memory consumption
+    // - Cache invalidation complexity
+    // - Stale data issues in distributed systems
+    //
+    // In production systems, prefer:
+    // - Pagination
+    // - Filtering
+    // - Caching individual items instead of entire lists
+    public async Task<IReadOnlyList<GetSampleRequestDto>> GetAllAsync()
     {
         var entities = await _repository.GetAllAsync();
-        return entities.Select(x => new SampleDTO
+        return [.. entities.Select(x => new GetSampleRequestDto
         {
             Id = x.Id,
-            Name = x.name
-        }).ToList();
+            Name = x.Name
+        })];
     }
 
-    public async Task<SampleDTO?> GetByIdAsync(Guid id)
+    public async Task<GetSampleRequestDto?> GetByIdAsync(Guid id)
     {
+        var cacheKey = $"sample:id:{id}";
+
+        // Try cache first
+        var cached = await _cache.GetAsync<GetSampleRequestDto>(cacheKey);
+        if (cached != null)
+            return cached;
+
+        // Fallback to DB
         var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return null;
-        return new SampleDTO
+        if (entity == null) 
+            return null;
+
+        var dto = new GetSampleRequestDto
         {
             Id = entity.Id,
-            Name = entity.name
+            Name = entity.Name
         };
+
+        // Store in cache
+        await _cache.SetAsync(cacheKey, dto,
+            TimeSpan.FromMinutes(10));
+
+        return dto;
     }
 
-    public async Task AddAsync(SampleDTO dto)
+    public async Task<Guid> AddAsync(AddSampleRequestDto dto)
     {
+        // In real world, you should validate the input data here before saving to database.
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
-            name = dto.Name
+            Name = dto.Name
         };
+
         await _repository.AddAsync(entity);
+
+        var cacheKey = $"sample:id:{entity.Id}";
+
+        // Invalidate item cache
+        await _cache.RemoveAsync(cacheKey);
+
+        return entity.Id;
     }
 
-    public async Task UpdateAsync(SampleDTO dto)
+    public async Task UpdateAsync(UpdateSampleRequestDto dto)
     {
+        // In real world, you should validate the input data here before saving to database.
         var entity = new SampleEntity
         {
             Id = dto.Id,
-            name = dto.Name
+            Name = dto.Name
         };
         await _repository.UpdateAsync(entity);
+
+        var cacheKey = $"sample:id:{dto.Id}";
+
+        // Invalidate item cache
+        await _cache.RemoveAsync(cacheKey);
     }
 
     public async Task DeleteByIdAsync(Guid id)
     {
         await _repository.DeleteByIdAsync(id);
+
+        var cacheKey = $"sample:id:{id}";
+
+        // Invalidate item cache
+        await _cache.RemoveAsync(cacheKey);
     }
 }

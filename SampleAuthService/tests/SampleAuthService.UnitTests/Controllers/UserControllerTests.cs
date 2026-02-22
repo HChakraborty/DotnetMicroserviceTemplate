@@ -5,6 +5,7 @@ using Moq;
 using SampleAuthService.Api.Controllers;
 using SampleAuthService.Application.DTO;
 using SampleAuthService.Application.DTO.UserDto;
+using SampleAuthService.Application.Events;
 using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Domain.Enums;
 using System.Security.Claims;
@@ -216,5 +217,70 @@ public class UserControllerTests
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
+    }
+
+    [Fact]
+    public async Task RegisterUserAsync_Should_Publish_UserCreatedEvent()
+    {
+        var dto = new RegisterUserDto
+        {
+            Email = "new@test.com",
+            Password = "password"
+        };
+
+        _userMock
+            .Setup(x => x.RegisterUserAsync(dto))
+            .Returns(Task.CompletedTask);
+
+        var result = await _controller.RegisterUserAsync(dto);
+
+        result.Should().BeOfType<OkObjectResult>();
+
+        _eventBus.Verify(
+            e => e.PublishAsync(It.Is<UserCreatedEvent>(
+                ev => ev.Email == dto.Email)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ResetPasswordRequestAsync_Should_Publish_UserPasswordResetEvent()
+    {
+        var dto = new ResetPasswordDto
+        {
+            Email = "user@test.com",
+            NewPassword = "newpass"
+        };
+
+        _userMock
+            .Setup(x => x.ResetPasswordRequestAsync(dto))
+            .ReturnsAsync(true);
+
+        var result = await _controller.ResetPasswordRequestAsync(dto);
+
+        result.Should().BeOfType<OkObjectResult>();
+
+        _eventBus.Verify(
+            e => e.PublishAsync(It.Is<UserPasswordResetEvent>(
+                ev => ev.Email == dto.Email)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteUserAsync_Should_Publish_UserDeletedEvent()
+    {
+        var email = "user@test.com";
+
+        _userMock
+            .Setup(x => x.DeleteUserAsync(email))
+            .ReturnsAsync(true);
+
+        var result = await _controller.DeleteUserAsync(email);
+
+        result.Should().BeOfType<OkObjectResult>();
+
+        _eventBus.Verify(
+            e => e.PublishAsync(It.Is<UserDeletedEvent>(
+                ev => ev.Email == email)),
+            Times.Once);
     }
 }

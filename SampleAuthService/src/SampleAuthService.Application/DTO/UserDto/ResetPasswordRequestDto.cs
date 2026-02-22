@@ -2,7 +2,7 @@
 
 namespace SampleAuthService.Application.DTO.UserDto;
 
-public class ResetPasswordDto
+public class ResetPasswordRequestDto
 {
     [Required]
     [EmailAddress]

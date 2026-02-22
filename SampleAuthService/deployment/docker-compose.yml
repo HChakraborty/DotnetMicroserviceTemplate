@@ -11,6 +11,8 @@ services:
       - .env
     depends_on:
       - auth-db
+      - rabbitmq-auth
+      - redis-auth
     volumes:
       - ./logs:/app/logs
     healthcheck:
@@ -36,7 +38,7 @@ services:
       retries: 20
       start_period: 120s
 
-  rabbitmq:
+  rabbitmq-auth:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
@@ -46,6 +48,16 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  
+  redis-auth:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10

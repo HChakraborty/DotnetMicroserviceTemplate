@@ -16,7 +16,7 @@ public class SampleCreatedConsumer : BackgroundService {
     } 
     
     private Task Handle(SampleCreatedEvent evt) {
-        Console.WriteLine($"Sample created event received: {evt.email}"); 
+        Console.WriteLine($"Sample created event received: {evt.Id}"); 
         return Task.CompletedTask; 
     } 
 }

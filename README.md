@@ -167,7 +167,7 @@ This endpoint does not require authentication because it is intended for infrast
 
 ---
 
-# Event-Driven Messaging (RabbitMQ)
+## Event-Driven Messaging (RabbitMQ)
 
 ## Event-Driven Messaging (RabbitMQ)
 
@@ -411,6 +411,138 @@ Advanced patterns such as:
 
 can be added as the system evolves.
 
+
+## Redis Caching
+
+## Redis Integration
+
+This template includes **Redis-based distributed caching** to improve performance and reduce database load for frequently accessed data.
+
+Redis is commonly used in microservices to cache read-heavy operations such as entity lookups, authorization data, and reference data.
+
+---
+
+## Purpose
+
+Caching is applied using the **cache-aside pattern**:
+
+```
+Request → Cache → Database → Cache store → Response
+```
+
+### Benefits
+
+* Reduces database queries
+* Improves response times
+* Supports horizontal scaling
+* Enables distributed cache across multiple service instances
+
+---
+
+## What Is Cached
+
+The template demonstrates caching for:
+
+* Entity retrieval by identifier (`GetById`)
+* Authentication-related data (e.g., user lookup by email)
+
+Large collections (`GetAll`) are intentionally not cached by default due to:
+
+* Potential memory consumption
+* Cache invalidation complexity
+* Risk of stale data
+
+Instead, production systems typically use pagination and filtering for large datasets.
+
+---
+
+## Cache Invalidation Strategy
+
+Cache entries are invalidated on data changes to prevent stale reads:
+
+| Operation | Cache Action                 |
+| --------- | ---------------------------- |
+| Create    | Invalidate list cache        |
+| Update    | Invalidate item + list cache |
+| Delete    | Remove item cache            |
+
+This ensures consistency between the cache and the database.
+
+---
+
+## Implementation Details
+
+Redis is accessed through an abstraction:
+
+```
+ICacheService
+```
+
+This keeps the Application layer independent from the caching technology and allows replacing Redis with another provider if needed.
+
+---
+
+## Configuration
+
+### appsettings.json (Local Development)
+
+```json
+"Redis": {
+  "ConnectionString": "localhost:6379"
+}
+```
+
+### Docker Environment
+
+When running with Docker Compose, the service connects using the container hostname:
+
+```
+Redis__ConnectionString=redis-auth:6379,abortConnect=false
+```
+
+The `abortConnect=false` option allows the service to retry connecting until Redis becomes available.
+
+---
+
+## Docker Setup
+
+Redis runs as a container:
+
+```yaml
+redis-auth:
+  image: redis:7
+  ports:
+    - "6379:6379"
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+```
+
+Health checks ensure dependent services wait until Redis is ready.
+
+---
+
+## Why Distributed Cache?
+
+In microservices, multiple instances of a service may run simultaneously.
+Using a distributed cache ensures all instances share the same cached data.
+
+---
+
+## Production Considerations
+
+In real systems, Redis may also be used for:
+
+* Session storage
+* Rate limiting
+* Distributed locks
+* Event-driven cache invalidation
+* Pub/Sub messaging
+
+These features are intentionally excluded from the template to keep it focused and extensible.
+
 ---
 
 ## Logging
@@ -639,16 +771,17 @@ Developers can copy this structure when adding new features.
 
 ## How to Add a New Feature Using This Template
 
-This template is designed to make feature development predictable and consistent across services.
-Follow these steps when implementing new functionality.
+This template is designed to make feature development **predictable, consistent, and maintainable** across services.
 
-The goal is to maintain Clean Architecture boundaries and keep responsibilities separated.
+When adding a new feature, follow the steps below to preserve Clean Architecture boundaries and ensure the feature integrates correctly with authentication, caching, messaging, and infrastructure concerns.
+
+The workflow moves **from core business model outward toward delivery mechanisms**.
 
 ---
 
-### Step 1 — Define the Domain Model
+### Step 1 — Model the Domain
 
-Create a new entity inside the **Domain layer**.
+Define the core business concept as a domain entity.
 
 ```
 ServiceName.Domain
@@ -667,29 +800,40 @@ public class Product
 }
 ```
 
-Why this step first:
+**Why first?**
 
-The Domain layer represents the core business model and should not depend on infrastructure or frameworks.
+The Domain layer represents the system’s core business rules and must remain independent of frameworks, databases, and external services.
+
+All other layers depend on this model — never the reverse.
 
 ---
 
-### Step 2 — Create DTOs
+### Step 2 — Define Use-Case DTOs
 
-Add request/response models in the **Application layer**.
+Create request/response models for the feature in the Application layer.
 
 ```
 ServiceName.Application
 └─ DTOs
-   └─ ProductDTO.cs
+   ├─ AddProductDto.cs
+   ├─ UpdateProductDto.cs
+   └─ GetProductDto.cs
 ```
 
-DTOs prevent exposing internal domain models directly to clients and allow validation or shaping of API responses.
+Use separate DTOs for different operations even if they look similar initially.
+
+This allows:
+
+* Independent validation rules
+* Safer API evolution
+* Prevention of over-posting vulnerabilities
+* Clear intent per operation
 
 ---
 
-### Step 3 — Define Service Interface
+### Step 3 — Define the Application Contract
 
-Create an interface describing business operations.
+Create an interface describing the business use cases.
 
 ```
 ServiceName.Application
@@ -702,23 +846,25 @@ Example:
 ```csharp
 public interface IProductService
 {
-    Task<IReadOnlyList<ProductDTO>> GetAllAsync();
-    Task<ProductDTO?> GetByIdAsync(Guid id);
-    Task AddAsync(ProductDTO dto);
-    Task UpdateAsync(ProductDTO dto);
+    Task<IReadOnlyList<GetProductDto>> GetAllAsync();
+    Task<GetProductDto?> GetByIdAsync(Guid id);
+    Task<Guid> AddAsync(AddProductDto dto);
+    Task UpdateAsync(UpdateProductDto dto);
     Task DeleteByIdAsync(Guid id);
 }
 ```
 
-Why interfaces:
+**Why interfaces?**
 
-They enable testing via mocks and keep controllers independent from concrete implementations.
+* Enables unit testing via mocks
+* Decouples API layer from implementations
+* Supports future replacement of business logic
 
 ---
 
-### Step 4 — Implement Application Service
+### Step 4 — Implement Application Logic
 
-Add business logic in the **Application layer**.
+Implement the use cases in the Application layer.
 
 ```
 ServiceName.Application
@@ -728,16 +874,19 @@ ServiceName.Application
 
 Responsibilities:
 
-* Validation
-* Mapping between DTOs and entities
-* Coordinating repository calls
+* Validation and orchestration
+* DTO ↔ Entity mapping
 * Enforcing business rules
+* Publishing domain events (if needed)
+* Cache interaction (read-through / invalidation)
+
+The Application layer must remain independent of infrastructure details.
 
 ---
 
-### Step 5 — Create Repository
+### Step 5 — Implement Data Access
 
-Implement data access in the **Infrastructure layer**.
+Create repository implementations in the Infrastructure layer.
 
 ```
 ServiceName.Infrastructure
@@ -745,13 +894,20 @@ ServiceName.Infrastructure
    └─ ProductRepository.cs
 ```
 
-Repositories isolate EF Core from business logic and allow swapping databases without changing services.
+Responsibilities:
+
+* Database queries
+* Persistence
+* Transaction boundaries
+* Mapping to domain entities
+
+This isolates EF Core (or any database technology) from business logic.
 
 ---
 
-### Step 6 — Register Dependencies
+### Step 6 — Wire Dependencies
 
-Add service and repository mappings in dependency injection configuration.
+Register implementations in the dependency injection container.
 
 Example:
 
@@ -760,11 +916,13 @@ services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IRepository<Product>, ProductRepository>();
 ```
 
+If the feature uses caching or messaging, register related components as well.
+
 ---
 
-### Step 7 — Add Controller Endpoints
+### Step 7 — Expose API Endpoints
 
-Expose the feature through the **API layer**.
+Add controller endpoints in the API layer.
 
 ```
 ServiceName.Api
@@ -772,7 +930,12 @@ ServiceName.Api
    └─ ProductController.cs
 ```
 
-Controllers should remain thin and delegate logic to services.
+Controllers should:
+
+* Remain thin
+* Delegate logic to Application services
+* Handle HTTP concerns only
+* Not contain business rules
 
 Example:
 
@@ -796,9 +959,9 @@ public class ProductController : ControllerBase
 
 ---
 
-### Step 8 — Add Authorization (Optional)
+### Step 8 — Apply Security Policies (If Required)
 
-Apply policies if the endpoint should be protected.
+Protect endpoints using authorization policies rather than inline role checks.
 
 Example:
 
@@ -806,21 +969,61 @@ Example:
 [Authorize(Policy = "WritePolicy")]
 ```
 
-Use policies instead of role checks inside controllers to keep authorization centralized.
+This keeps security centralized and consistent across services.
 
 ---
 
-### Step 9 — Add Unit Tests
+### Step 9 — Integrate Cross-Cutting Concerns
 
-Add tests for:
+Depending on the feature, integrate:
 
-* Controller behavior (mock service)
-* Service logic (mock repository)
-* Repository operations (in-memory database)
+* Caching (Redis)
+* Event publishing (RabbitMQ)
+* Validation
+* Logging
+* Rate limiting
+* Background processing
 
-Testing each layer independently ensures reliability without requiring full integration tests.
+These concerns should be handled through existing abstractions to maintain consistency.
 
 ---
+
+### Step 10 — Add Tests
+
+Test each layer independently:
+
+| Layer          | Testing Strategy                        |
+| -------------- | --------------------------------------- |
+| Controller     | Mock Application services               |
+| Application    | Mock repositories and external services |
+| Infrastructure | In-memory or test database              |
+
+This layered testing approach avoids fragile end-to-end tests while maintaining confidence in the system.
+
+---
+
+## Development Workflow Summary
+
+```
+Domain → Application → Infrastructure → API
+```
+
+Always build features from the inside out to preserve architectural integrity.
+
+---
+
+## Why This Process Matters
+
+Following this workflow ensures:
+
+* Consistent feature structure across services
+* Minimal coupling between layers
+* Easier testing and maintenance
+* Clear separation of responsibilities
+* Compatibility with distributed architecture patterns
+
+---
+
 
 ## Project Structure
 
@@ -850,6 +1053,7 @@ ServiceName
   │ ├─ BackgroundServices
   │ ├─ Configuration
   │ ├─ Messaging
+  │ ├─ Caching
   │ └─ Migrations
 tests/
   ├─ ServiceName.UnitTests
@@ -885,6 +1089,7 @@ SampleAuthService
   │ ├─ BackgroundServices
   │ ├─ Configuration
   │ ├─ Messaging
+  │ ├─ Caching
   │ └─ Migrations
 tests/
   ├─ AuthService.UnitTests

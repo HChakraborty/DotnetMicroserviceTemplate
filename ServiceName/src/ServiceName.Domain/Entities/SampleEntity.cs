@@ -2,5 +2,5 @@
 
 public class SampleEntity: BaseEntity
 {
-    public string name { get; set; } = String.Empty;
+    public string Name { get; set; } = String.Empty;
 }

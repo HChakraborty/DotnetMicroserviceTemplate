@@ -8,5 +8,5 @@ public interface IUserService
     Task RegisterUserAsync(RegisterUserDto dto);
     Task<bool> ResetPasswordRequestAsync(ResetPasswordDto dto);
     Task<bool> DeleteUserAsync(string email);
-    Task<GetUserDto?> GetUserByEmailAsync(string email);
+    Task<GetUserRequestDto?> GetUserByEmailAsync(string email);
 }

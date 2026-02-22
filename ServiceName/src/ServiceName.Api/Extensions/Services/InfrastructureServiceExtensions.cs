@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Options;
 using ServiceName.Application.Interfaces;
 using ServiceName.Domain.Entities;
+using ServiceName.Infrastructure.Caching;
 using ServiceName.Infrastructure.Configuration;
 using ServiceName.Infrastructure.Persistence;
 using ServiceName.Infrastructure.Repositories;
+using StackExchange.Redis;
 
 namespace ServiceName.Api.Extensions.Services;
 
@@ -59,6 +61,25 @@ public static class InfrastructureServiceExtensions
 
             throw new Exception("RabbitMQ not reachable after retries.");
         });
+
+        var redisConnection =
+                config.GetSection("Redis")["ConnectionString"];
+
+        if (string.IsNullOrWhiteSpace(redisConnection))
+        {
+            throw new InvalidOperationException(
+                "Redis connection string is missing.");
+        }
+
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var options = ConfigurationOptions.Parse(redisConnection);
+            options.AbortOnConnectFail = false;
+
+            return ConnectionMultiplexer.Connect(options);
+        });
+
+        services.AddScoped<ICacheService, RedisCacheService>();
 
         return services;
     }

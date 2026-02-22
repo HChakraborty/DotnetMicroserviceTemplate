@@ -40,21 +40,30 @@ public class SampleController: ControllerBase
         return Ok(result);
     }
 
+
+    // We have added DTOs for Add, Update and Delete.
+    // They look same for now but in real world they can differ and it's a good practice to separate them.
     [Authorize(Policy = "WritePolicy")]
     [HttpPost]
-    public async Task<IActionResult> AddAsync(SampleDTO dto)
+    public async Task<IActionResult> AddAsync(AddSampleRequestDto dto)
     {
-        await _service.AddAsync(dto);
+        var id = await _service.AddAsync(dto);
 
         await _eventBus.PublishAsync(
-            new SampleCreatedEvent(dto.Name));
+            new SampleCreatedEvent(id));
 
-        return Ok();
+        var response = new AddSampleResponseDto 
+        {   
+            Message = "Sample created successfully.",
+            Id = id 
+        };
+
+        return Ok(response);
     }
 
     [Authorize(Policy = "WritePolicy")]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, SampleDTO dto)
+    public async Task<IActionResult> UpdateAsync(Guid id, UpdateSampleRequestDto dto)
     {
         // Prevent inconsistent updates if client sends mismatched ids
         if (dto.Id != Guid.Empty && dto.Id != id)
@@ -67,7 +76,12 @@ public class SampleController: ControllerBase
         await _eventBus.PublishAsync(
             new SampleUpdatedEvent(dto.Id));
 
-        return Ok();
+        var response = new UpdateSampleResponseDto 
+        {   
+            Message = "Sample updated successfully.",
+        };
+
+        return Ok(response);
     }
 
     [Authorize(Policy = "AdminPolicy")]
@@ -83,6 +97,12 @@ public class SampleController: ControllerBase
             await _eventBus.PublishAsync(
                 new SampleDeletedEvent(result.Id));
         }
-        return Ok();
+
+        var response = new DeleteSampleResponseDto 
+        {   
+            Message = "Sample deleted successfully.",
+        };
+
+        return Ok(response);
     }
 }

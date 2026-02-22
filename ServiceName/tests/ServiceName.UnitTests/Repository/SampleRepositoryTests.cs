@@ -42,7 +42,7 @@ public class SampleRepositoryTests : IAsyncLifetime
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
-            name = "Test Name"
+            Name = "Test Name"
         };
 
         await _repo.AddAsync(entity);
@@ -52,7 +52,7 @@ public class SampleRepositoryTests : IAsyncLifetime
 
         // Assert
         Assert.NotNull(saved);
-        Assert.Equal("Test Name", saved!.name);
+        Assert.Equal("Test Name", saved!.Name);
     }
 
     [Fact]
@@ -60,8 +60,8 @@ public class SampleRepositoryTests : IAsyncLifetime
     {
         // Arrange
         _context.SampleEntities.AddRange(
-            new SampleEntity { Id = Guid.NewGuid(), name = "One" },
-            new SampleEntity { Id = Guid.NewGuid(), name = "Two" }
+            new SampleEntity { Id = Guid.NewGuid(), Name = "One" },
+            new SampleEntity { Id = Guid.NewGuid(), Name = "Two" }
         );
 
         await _context.SaveChangesAsync();
@@ -80,7 +80,7 @@ public class SampleRepositoryTests : IAsyncLifetime
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
-            name = "Find Me"
+            Name = "Find Me"
         };
 
         _context.SampleEntities.Add(entity);
@@ -91,7 +91,7 @@ public class SampleRepositoryTests : IAsyncLifetime
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("Find Me", result!.name);
+        Assert.Equal("Find Me", result!.Name);
     }
 
     [Fact]
@@ -114,13 +114,13 @@ public class SampleRepositoryTests : IAsyncLifetime
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
-            name = "Old Name"
+            Name = "Old Name"
         };
 
         _context.SampleEntities.Add(entity);
         await _context.SaveChangesAsync();
 
-        entity.name = "New Name";
+        entity.Name = "New Name";
 
         await _repo.UpdateAsync(entity);
 
@@ -128,7 +128,7 @@ public class SampleRepositoryTests : IAsyncLifetime
         var updated = await _context.SampleEntities.FirstAsync();
 
         // Assert
-        Assert.Equal("New Name", updated.name);
+        Assert.Equal("New Name", updated.Name);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class SampleRepositoryTests : IAsyncLifetime
         var entity = new SampleEntity
         {
             Id = Guid.NewGuid(),
-            name = "Delete Me"
+            Name = "Delete Me"
         };
 
         _context.SampleEntities.Add(entity);

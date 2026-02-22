@@ -21,29 +21,42 @@ public class UserController : ControllerBase
         _eventBus = eventBus;
     }
 
+
+    // We have added DTOs for Add, Update and Delete.
+    // They look same for now but in real world they can differ and it's a good practice to separate them.
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> RegisterUserAsync(RegisterUserDto dto)
+    public async Task<IActionResult> RegisterUserAsync(RegisterUserRequestDto dto)
     {
         await _auth.RegisterUserAsync(dto);
 
         await _eventBus.PublishAsync(
             new UserCreatedEvent(dto.Email));
 
-        return Ok("User Registeration Successful!");
+        var response = new RegisterUserResponseDto
+        {
+            Message = $"User Registration Successful for ${dto.Email} with Role ${dto.Role}!"
+        };
+
+        return Ok(response);
     }
 
     [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPasswordRequestAsync(
-        ResetPasswordDto dto)
+        ResetPasswordRequestDto dto)
     {
         await _auth.ResetPasswordRequestAsync(dto);
 
         await _eventBus.PublishAsync(
             new UserPasswordResetEvent(dto.Email));
 
-        return Ok("Password Reset Successful!");
+        var response = new ResetPasswordResponseDto
+        {
+            Message = $"Password Reset Successful for ${dto.Email}!"
+        };
+
+        return Ok(response);
     }
 
     [Authorize(Policy = "AdminPolicy")]
@@ -55,7 +68,12 @@ public class UserController : ControllerBase
         await _eventBus.PublishAsync(
             new UserDeletedEvent(email));
 
-        return Ok("User deleted Successful!");
+        var response = new DeleteUserResponseDto
+        {
+            Message = $"User Deletion Successful for ${email}!"
+        };
+
+        return Ok(response);
     }
 
     [Authorize(Policy = "ReadPolicy")]

@@ -1,4 +1,4 @@
 ﻿namespace ServiceName.Application.Events;
 
-public record SampleUpdatedEvent(Guid id);
+public record SampleUpdatedEvent(Guid Id);
 

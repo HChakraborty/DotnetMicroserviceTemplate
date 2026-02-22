@@ -13,15 +13,18 @@ public class UserServiceTests
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly Mock<IJwtService> _jwtMock;
     private readonly UserService _service;
+    private readonly Mock<ICacheService> _cacheMock;
 
     public UserServiceTests()
     {
         _userRepoMock = new Mock<IUserRepository>();
         _jwtMock = new Mock<IJwtService>();
+        _cacheMock = new Mock<ICacheService>();
 
         _service = new UserService(
             _userRepoMock.Object,
-            _jwtMock.Object);
+            _jwtMock.Object,
+            _cacheMock.Object);
     }
 
     [Fact]
@@ -196,5 +199,101 @@ public class UserServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _service.GetUserByEmailAsync(email));
+    }
+
+    [Fact]
+    public async Task GetUserByEmailAsync_Should_Return_From_Cache_When_Available()
+    {
+        var email = "cached@test.com";
+
+        var cachedDto = new GetUserDto
+        {
+            Email = email,
+            Role = UserRole.ReadUser
+        };
+
+        _cacheMock
+            .Setup(c => c.GetAsync<GetUserDto>($"user:email:{email}"))
+            .ReturnsAsync(cachedDto);
+
+        var result = await _service.GetUserByEmailAsync(email);
+
+        result.Should().NotBeNull();
+        result!.Email.Should().Be(email);
+
+        _userRepoMock.Verify(
+            r => r.GetUserByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task GetUserByEmailAsync_Should_Fetch_From_Db_And_Set_Cache()
+    {
+        var email = "db@test.com";
+
+        _cacheMock
+            .Setup(c => c.GetAsync<GetUserDto>($"user:email:{email}"))
+            .ReturnsAsync((GetUserDto?)null);
+
+        var user = new User(
+            email,
+            BCrypt.Net.BCrypt.HashPassword("pass"),
+            UserRole.ReadUser);
+
+        _userRepoMock
+            .Setup(r => r.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        var result = await _service.GetUserByEmailAsync(email);
+
+        result.Should().NotBeNull();
+
+        _cacheMock.Verify(
+            c => c.SetAsync(
+                $"user:email:{email}",
+                It.IsAny<GetUserDto>(),
+                It.IsAny<TimeSpan>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RegisterUserAsync_Should_Remove_User_Cache()
+    {
+        var dto = new RegisterUserDto
+        {
+            Email = "new@test.com",
+            Password = "password"
+        };
+
+        _userRepoMock
+            .Setup(x => x.GetUserByEmailAsync(dto.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((User?)null);
+
+        await _service.RegisterUserAsync(dto);
+
+        _cacheMock.Verify(
+            c => c.RemoveAsync($"user:email:{dto.Email.ToLower()}"),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteUserAsync_Should_Remove_User_Cache()
+    {
+        var email = "delete@test.com";
+
+        var user = new User(
+            email,
+            BCrypt.Net.BCrypt.HashPassword("pass"),
+            UserRole.ReadUser);
+
+        _userRepoMock
+            .Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        await _service.DeleteUserAsync(email);
+
+        _cacheMock.Verify(
+            c => c.RemoveAsync($"user:email:{email.ToLower()}"),
+            Times.Once);
     }
 }

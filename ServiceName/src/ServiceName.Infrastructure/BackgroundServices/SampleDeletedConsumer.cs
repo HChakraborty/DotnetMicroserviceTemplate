@@ -16,7 +16,7 @@ public class SampleDeletedConsumer : BackgroundService {
     } 
     
     private Task Handle(SampleDeletedEvent evt) {
-        Console.WriteLine($"Sample deleted event received: {evt.id}"); 
+        Console.WriteLine($"Sample deleted event received: {evt.Id}"); 
         return Task.CompletedTask; 
     } 
 }
