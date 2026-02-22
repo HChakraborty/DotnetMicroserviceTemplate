@@ -35,7 +35,7 @@ public class UserServiceTests
             .Setup(x => x.GetUserByEmailAsync("new@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        var dto = new RegisterUserDto
+        var dto = new RegisterUserRequestDto
         {
             Email = "new@test.com",
             Password = "password"
@@ -61,7 +61,7 @@ public class UserServiceTests
             .Setup(x => x.GetUserByEmailAsync("existing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingUser);
 
-        var dto = new RegisterUserDto
+        var dto = new RegisterUserRequestDto
         {
             Email = "existing@test.com",
             Password = "password"
@@ -85,7 +85,7 @@ public class UserServiceTests
             .Setup(x => x.GetUserByEmailAsync("reset@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var dto = new ResetPasswordDto
+        var dto = new ResetPasswordRequestDto
         {
             Email = "reset@test.com",
             NewPassword = "newpassword"
@@ -107,7 +107,7 @@ public class UserServiceTests
             .Setup(x => x.GetUserByEmailAsync("missing@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        var dto = new ResetPasswordDto
+        var dto = new ResetPasswordRequestDto
         {
             Email = "missing@test.com",
             NewPassword = "pass"
@@ -206,14 +206,14 @@ public class UserServiceTests
     {
         var email = "cached@test.com";
 
-        var cachedDto = new GetUserDto
+        var cachedDto = new GetUserRequestDto
         {
             Email = email,
             Role = UserRole.ReadUser
         };
 
         _cacheMock
-            .Setup(c => c.GetAsync<GetUserDto>($"user:email:{email}"))
+            .Setup(c => c.GetAsync<GetUserRequestDto>($"user:email:{email}"))
             .ReturnsAsync(cachedDto);
 
         var result = await _service.GetUserByEmailAsync(email);
@@ -232,8 +232,8 @@ public class UserServiceTests
         var email = "db@test.com";
 
         _cacheMock
-            .Setup(c => c.GetAsync<GetUserDto>($"user:email:{email}"))
-            .ReturnsAsync((GetUserDto?)null);
+            .Setup(c => c.GetAsync<GetUserRequestDto>($"user:email:{email}"))
+            .ReturnsAsync((GetUserRequestDto?)null);
 
         var user = new User(
             email,
@@ -251,7 +251,7 @@ public class UserServiceTests
         _cacheMock.Verify(
             c => c.SetAsync(
                 $"user:email:{email}",
-                It.IsAny<GetUserDto>(),
+                It.IsAny<GetUserRequestDto>(),
                 It.IsAny<TimeSpan>()),
             Times.Once);
     }
@@ -259,7 +259,7 @@ public class UserServiceTests
     [Fact]
     public async Task RegisterUserAsync_Should_Remove_User_Cache()
     {
-        var dto = new RegisterUserDto
+        var dto = new RegisterUserRequestDto
         {
             Email = "new@test.com",
             Password = "password"

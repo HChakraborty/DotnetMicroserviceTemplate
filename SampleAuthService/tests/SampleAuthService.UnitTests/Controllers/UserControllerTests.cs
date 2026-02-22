@@ -29,7 +29,7 @@ public class UserControllerTests
     public async Task RegisterUserAsync_Should_Return_Ok()
     {
         // Arrange
-        var dto = new RegisterUserDto
+        var dto = new RegisterUserRequestDto
         {
             Email = "new@test.com",
             Password = "password"
@@ -52,7 +52,7 @@ public class UserControllerTests
     public async Task ResetPasswordRequestAsync_Should_Return_Ok()
     {
         // Arrange
-        var dto = new ResetPasswordDto
+        var dto = new ResetPasswordRequestDto
         {
             Email = "user@test.com",
             NewPassword = "newpass"
@@ -111,7 +111,7 @@ public class UserControllerTests
         // Arrange
         var targetEmail = "read@test.com";
 
-        var dto = new GetUserDto
+        var dto = new GetUserRequestDto
         {
             Email = targetEmail,
             Role = UserRole.ReadUser
@@ -138,7 +138,7 @@ public class UserControllerTests
         // Assert
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
 
-        var returned = ok.Value.Should().BeOfType<GetUserDto>().Subject;
+        var returned = ok.Value.Should().BeOfType<GetUserRequestDto>().Subject;
 
         returned.Email.Should().Be(targetEmail);
     }
@@ -173,7 +173,7 @@ public class UserControllerTests
         // Arrange
         var targetEmail = "admin@test.com";
 
-        var adminDto = new GetUserDto
+        var adminDto = new GetUserRequestDto
         {
             Email = targetEmail,
             Role = UserRole.Admin
@@ -222,7 +222,7 @@ public class UserControllerTests
     [Fact]
     public async Task RegisterUserAsync_Should_Publish_UserCreatedEvent()
     {
-        var dto = new RegisterUserDto
+        var dto = new RegisterUserRequestDto
         {
             Email = "new@test.com",
             Password = "password"
@@ -245,7 +245,7 @@ public class UserControllerTests
     [Fact]
     public async Task ResetPasswordRequestAsync_Should_Publish_UserPasswordResetEvent()
     {
-        var dto = new ResetPasswordDto
+        var dto = new ResetPasswordRequestDto
         {
             Email = "user@test.com",
             NewPassword = "newpass"

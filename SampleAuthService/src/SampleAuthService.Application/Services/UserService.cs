@@ -21,7 +21,7 @@ public class UserService : IUserService
     }
 
     // In a real app, you'd want to validate the password strength, check for existing email, etc.
-    public async Task RegisterUserAsync(RegisterUserDto dto)
+    public async Task RegisterUserAsync(RegisterUserRequestDto dto)
     {
         var user = await _users.GetUserByEmailAsync(dto.Email);
 
@@ -34,13 +34,13 @@ public class UserService : IUserService
 
         await _users.AddUserAsync(user);
 
-        // 🔥 Invalidate cache (if any stale entry exists)
+        // Invalidate cache (if any stale entry exists)
         var cacheKey = $"user:email:{dto.Email.ToLower()}";
         await _cache.RemoveAsync(cacheKey);
     }
 
     // For simplicity, we won't implement email sending. In a real app, you'd generate a token or OTP, save it, and email it to the user.
-    public async Task<bool> ResetPasswordRequestAsync(ResetPasswordDto dto)
+    public async Task<bool> ResetPasswordRequestAsync(ResetPasswordRequestDto dto)
     {
         var user = await _users.GetUserByEmailAsync(dto.Email);
 
@@ -64,19 +64,19 @@ public class UserService : IUserService
 
         await _users.DeleteUserAsync(user);
 
-        // 🔥 Remove cached user
+        // Remove cached user
         var cacheKey = $"user:email:{email.ToLower()}";
         await _cache.RemoveAsync(cacheKey);
 
         return true;
     }
 
-    public async Task<GetUserDto?> GetUserByEmailAsync(string email)
+    public async Task<GetUserRequestDto?> GetUserByEmailAsync(string email)
     {
         var cacheKey = $"user:email:{email.ToLower()}";
 
         // Try cache first
-        var cached = await _cache.GetAsync<GetUserDto>(cacheKey);
+        var cached = await _cache.GetAsync<GetUserRequestDto>(cacheKey);
         if (cached != null)
             return cached;
 
@@ -86,7 +86,7 @@ public class UserService : IUserService
         if (user == null)
             throw new KeyNotFoundException("User not found.");
 
-        var dto = new GetUserDto
+        var dto = new GetUserRequestDto
         {
             Email = user.Email,
             Role = user.Role

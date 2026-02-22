@@ -2,7 +2,7 @@
 
 namespace SampleAuthService.Application.DTO.UserDto;
 
-public class DeleteUserDto
+public class DeleteUserRequestDto
 {
     [Required]
     [EmailAddress]
