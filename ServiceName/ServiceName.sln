@@ -16,10 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceName.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceName.UnitTests", "tests\ServiceName.UnitTests\ServiceName.UnitTests.csproj", "{CAAC1913-199D-FEF7-2630-581B380B5E13}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceName.UnitTests", "ServiceName.UnitTests", "{7E7669D9-82EB-445C-A465-CA0414463FBD}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceName.IntegrationTests", "ServiceName.IntegrationTests", "{C2CBF2AF-67FB-4A1E-9AD1-981A415D3636}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceName.IntegrationTests", "tests\ServiceName.IntegrationTests\ServiceName.IntegrationTests.csproj", "{2620397E-85F5-4876-B095-121CE9CC17CB}"
 EndProject
 Global

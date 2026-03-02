@@ -6,7 +6,7 @@ namespace ServiceName.Api.Extensions.Builder;
 public static class ApplicationBuilderExtensions
 {
     // Automatically applies pending migrations at startup
-    // retry logic handles delayed startup of the database
+    // Retry logic handles delayed startup of the database
     public static WebApplication ApplyDatabaseMigrations(this WebApplication app)
     {
         if (app.Environment.IsEnvironment("IntegrationTests"))

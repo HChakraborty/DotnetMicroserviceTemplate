@@ -4,6 +4,7 @@ using ServiceName.Application.Interfaces;
 using ServiceName.Domain.Entities;
 using ServiceName.Infrastructure.Caching;
 using ServiceName.Infrastructure.Configuration;
+using ServiceName.Infrastructure.Messaging;
 using ServiceName.Infrastructure.Persistence;
 using ServiceName.Infrastructure.Repositories;
 using StackExchange.Redis;
@@ -13,6 +14,17 @@ namespace ServiceName.Api.Extensions.Services;
 public static class InfrastructureServiceExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddSqlInfrastructure(config);
+        services.AddRabbitMqInfrastructure(config);
+        services.AddRedisInfrastructure(config);
+
+        services.AddScoped<IRepository<SampleEntity>, SampleRepository>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddSqlInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         var connectionString = config.GetConnectionString("Default");
 
@@ -34,8 +46,11 @@ public static class InfrastructureServiceExtensions
                         errorNumbersToAdd: null);
                 }));
 
-        services.AddScoped<IRepository<SampleEntity>, SampleRepository>();
+        return services;
+    }
 
+    public static IServiceCollection AddRabbitMqInfrastructure(this IServiceCollection services, IConfiguration config)
+    {
         services.Configure<RabbitMqSettings>(
             config.GetSection("RabbitMq"));
 
@@ -62,6 +77,22 @@ public static class InfrastructureServiceExtensions
             throw new Exception("RabbitMQ not reachable after retries.");
         });
 
+        return services;
+    }
+
+    // Redis is used only as a cache (performance optimization).
+    // The service must remain functional even if Redis is unavailable.
+    // Therefore we DO NOT block startup waiting for Redis.
+    // 
+    // AbortOnConnectFail = false enables lazy connection so the app can start
+    // and cache operations will gracefully fallback to DB if Redis is down.
+    //
+    // In contrast:
+    // - SQL Server is required for core data → startup retry enabled
+    // - RabbitMQ is important for event delivery(If other services internally or externally depend upon it) → startup retry enabled
+
+    public static IServiceCollection AddRedisInfrastructure(this IServiceCollection services, IConfiguration config)
+    {
         var redisConnection =
                 config.GetSection("Redis")["ConnectionString"];
 

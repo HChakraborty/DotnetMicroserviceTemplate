@@ -5,10 +5,6 @@ using System.Text.Json;
 
 namespace ServiceName.Infrastructure.Caching;
 
-/// <summary>
-/// Redis cache implementation using cache-aside pattern.
-/// 
-/// IMPORTANT:
 /// Cache is treated as OPTIONAL infrastructure.
 /// Failures (connection issues, timeouts) must NOT break core business operations.
 /// 
@@ -16,10 +12,6 @@ namespace ServiceName.Infrastructure.Caching;
 /// - Cache hit → return data
 /// - Cache miss → return null (fallback to DB in Application layer)
 /// - Cache unavailable → behave like cache miss
-/// 
-/// This ensures system correctness does not depend on Redis availability,
-/// which is especially important in integration tests and production outages.
-/// </summary>
 public class RedisCacheService : ICacheService
 {
     private readonly IDatabase _db;

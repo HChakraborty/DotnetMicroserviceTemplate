@@ -1,6 +1,6 @@
 ﻿using ServiceName.Infrastructure.BackgroundServices;
 
-namespace SampleAuthService.Api.Extensions.Services;
+namespace ServiceName.Api.Extensions.Services;
 
 public static class MessagingEventExtensions
 {

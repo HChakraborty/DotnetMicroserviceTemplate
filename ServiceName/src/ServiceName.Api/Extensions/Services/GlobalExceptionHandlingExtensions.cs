@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace SampleAuthService.Api.Extensions;
+namespace ServiceName.Api.Extensions.Services;
 
 public static class GlobalExceptionHandlingExtensions
 {

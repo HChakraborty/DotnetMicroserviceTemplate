@@ -5,6 +5,8 @@ using SampleAuthService.Infrastructure.Configuration;
 using System.Text;
 using System.Text.Json;
 
+namespace SampleAuthService.Infrastructure.Messaging;
+
 public class RabbitMqEventBus : IEventBus, IDisposable
 {
     private readonly IConnection _connection;

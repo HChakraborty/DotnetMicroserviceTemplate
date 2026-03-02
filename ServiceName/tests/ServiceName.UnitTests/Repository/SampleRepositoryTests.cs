@@ -5,7 +5,7 @@ using ServiceName.Domain.Entities;
 using ServiceName.Infrastructure.Persistence;
 using ServiceName.Infrastructure.Repositories;
 
-namespace ServiceName.UnitTests.Repositories;
+namespace ServiceName.UnitTests.Repository;
 
 public class SampleRepositoryTests : IAsyncLifetime
 {

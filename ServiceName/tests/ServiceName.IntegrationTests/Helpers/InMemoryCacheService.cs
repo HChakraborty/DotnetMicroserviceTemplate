@@ -3,7 +3,6 @@ using ServiceName.Application.Interfaces;
 
 namespace ServiceName.IntegrationTests.Helpers;
 
-// Test-only cache implementation used in integration tests.
 // Replaces the Redis-based cache to avoid external dependencies,
 // making tests faster, deterministic, and runnable without Docker Redis.
 public class InMemoryCacheService : ICacheService
