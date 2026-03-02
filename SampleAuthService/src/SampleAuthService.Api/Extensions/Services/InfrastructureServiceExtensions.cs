@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using SampleAuthService.Application.Interfaces;
 using SampleAuthService.Infrastructure.Caching;
 using SampleAuthService.Infrastructure.Configuration;
+using SampleAuthService.Infrastructure.Messaging;
 using SampleAuthService.Infrastructure.Persistence;
 using SampleAuthService.Infrastructure.Repositories;
 using SampleAuthService.Infrastructure.Security;

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using SampleAuthService.Api.Extensions;
-using SampleAuthService.Api.Extensions.Services;
 using Serilog;
 using ServiceName.Api.Extensions.Application;
 using ServiceName.Api.Extensions.Builder;

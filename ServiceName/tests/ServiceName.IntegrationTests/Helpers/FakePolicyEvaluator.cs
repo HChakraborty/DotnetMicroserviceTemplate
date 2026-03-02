@@ -50,7 +50,7 @@ public class FakePolicyEvaluator : IPolicyEvaluator
 
         var user = authenticationResult.Principal!;
 
-        // ⭐ Evaluate role requirements
+        // Evaluate role requirements
         foreach (var requirement in policy.Requirements)
         {
             if (requirement is RolesAuthorizationRequirement rolesRequirement)

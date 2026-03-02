@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SampleAuthService.Api.Controllers;
-using SampleAuthService.Application.DTO;
 using SampleAuthService.Application.DTO.UserDto;
 using SampleAuthService.Application.Events;
 using SampleAuthService.Application.Interfaces;

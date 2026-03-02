@@ -4,7 +4,7 @@ using ServiceName.IntegrationTests.Fixtures;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace ServiceName.IntegrationTests.Controllers;
+namespace ServiceName.IntegrationTests.Api;
 
 public class SampleControllerIntegrationTests
     : IClassFixture<ContainersFixture>, IAsyncLifetime

@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
-using ServiceName.Infrastructure.Persistence;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 

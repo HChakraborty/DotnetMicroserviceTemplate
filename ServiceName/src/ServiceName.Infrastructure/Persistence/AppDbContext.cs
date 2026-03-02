@@ -3,9 +3,7 @@ using ServiceName.Domain.Entities;
 
 namespace ServiceName.Infrastructure.Persistence;
 
-public class AppDbContext: DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
     public DbSet<SampleEntity> SampleEntities => Set<SampleEntity>();
 }
