@@ -1055,6 +1055,77 @@ Developers can copy this structure when adding new features.
 
 ---
 
+## CI/CD Pipeline
+
+
+## Continuous Integration & Deployment
+
+This template includes GitHub Actions workflows to automate build validation, testing, and packaging.
+
+### Pipeline Strategy
+
+The repository uses a **two-stage CI approach** to balance speed and reliability:
+
+#### Pull Request Validation (Fast Checks)
+
+Runs on every PR targeting `master`:
+
+* Build verification
+* Unit tests
+* Code quality checks
+
+These checks provide fast feedback to developers and prevent obvious issues from reaching the main branch.
+
+---
+
+#### Master Branch Pipeline (Full Validation)
+
+Runs after changes are merged into `master`:
+
+* Build verification
+* Unit tests
+* Integration tests (with Docker infrastructure)
+* Database migrations validation
+* API publish
+* Docker image build
+
+Integration tests run only on the main branch because they require containerized infrastructure (SQL Server, Redis, RabbitMQ) and are intentionally heavier.
+
+---
+
+### Why This Approach?
+
+* Keeps pull requests fast and developer-friendly
+* Ensures full system validation before releases
+* Prevents slow infrastructure tests from blocking development flow
+* Mirrors real-world microservice CI strategies
+
+---
+
+### Infrastructure in CI
+
+Integration tests spin up real dependencies using Docker:
+
+* SQL Server
+* Redis
+* RabbitMQ
+
+This ensures tests run against realistic environments without manual setup.
+
+---
+
+### Branch Protection
+
+The `master` branch is protected with:
+
+* Required pull requests
+* Required status checks
+* No direct pushes allowed
+
+This enforces quality gates before changes are merged.
+
+---
+
 ## How to Add a New Feature Using This Template
 
 This template is designed to make feature development **predictable, consistent, and maintainable** across services.
@@ -1271,26 +1342,6 @@ Depending on the feature, integrate:
 * Background processing
 
 These concerns should be handled through existing abstractions to maintain consistency.
-
----
-
-Excellent observation. ✅
-You found a **real documentation bug** in your template.
-
-Right now Step 10 implies:
-
-> ❌ Only unit tests matter
-> ❌ Integration tests are optional
-> ❌ Infrastructure is tested only via in-memory DB
-
-But your template **clearly supports integration tests** with:
-
-* Testcontainers
-* Real DB
-* Fake auth
-* Full pipeline testing
-
-So Step 10 must reflect BOTH.
 
 ---
 ### Step 10 — Add Tests
