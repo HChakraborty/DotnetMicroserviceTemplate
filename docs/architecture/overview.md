@@ -48,7 +48,7 @@
 
 ## Layered Structure and Responsibilities
 
-The template uses four primary layers (But can added depending on requirements, like Handler in CQRS pattern):
+The template uses four primary layers (But can added depending on requirements, like Handler in CQRS pattern, etc.):
 
 
 ```mermaid
@@ -86,21 +86,25 @@ The API layer typically includes the following responsibilities:
 
 ```mermaid
 flowchart LR
-    Client[Client Request] --> Auth[Authentication & Authorization]
+    Client --> Auth
 
-    Auth --> Middleware[Middleware Pipeline]
+    subgraph API Layer
+        Auth[Authentication & Authorization]
+        Middleware[Middleware Pipeline]
+        Validation[Model Binding & Request Validation]
+        Controller[Controller]
+        Format[Response Formatting]
+    end
 
-    Middleware --> Validation[Model Binding & Request Validation]
+    Auth --> Middleware
+    Middleware --> Validation
+    Validation --> Controller
 
-    Validation --> Controller[Controller]
-
-    Controller --> AppCall[Call Application Layer]
-
+    Controller --> AppCall[Application Layer]
     AppCall --> Controller
 
-    Controller --> Format[Response Formatting]
-
-    Format --> Response[HTTP Response]
+    Controller --> Format
+    Format --> Response
 
     Response --> Client
 ```
@@ -127,21 +131,19 @@ The Application layer typically includes:
 
 ```mermaid
 flowchart LR
-    API[API Layer Request] --> Service[Application Service]
+    API --> App
 
-    Service --> Validate[Use Case Validation]
+    subgraph Application Layer
+        App[Application Service]
+    end
 
-    Validate --> MapIn[DTO → Domain Mapping]
+    App --> Domain[Domain Layer]
+    App --> Infra[Infrastructure Layer]
 
-    MapIn --> Domain[Domain Operations]
+    Infra --> App
+    Domain --> App
 
-    Domain --> Interfaces[Infrastructure Interfaces]
-
-    Interfaces --> MapOut[Domain → DTO Mapping]
-
-    MapOut --> Service
-
-    Service --> APIResponse[Return to API Layer]
+    App --> API[API Layer]
 ```
 
 ### Domain Layer
@@ -198,15 +200,20 @@ The Infrastructure layer typically includes:
 
 ```mermaid
 flowchart LR
-    App[Application Layer] --> Interface[Defined Interface]
+    App[Application Layer]
 
-    Interface --> Repo[Repository Implementation]
+    subgraph Infrastructure Layer
+        Cache[Cache Implementation]
+        Repo[Repository Implementation]
+        DB[(Database)]
+        External[External Services]
+    end
 
-    Repo --> DB[(Database)]
+    App --> Cache
+    App --> Repo
 
-    Repo --> External[External Services]
-
-    Repo --> Cache[(Cache Provider)]
+    Repo --> DB
+    Repo --> External
 ```
 
 
