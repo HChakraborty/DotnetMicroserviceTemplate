@@ -1,0 +1,85 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+
+  # Always run – ensures workflow appears in required checks
+  basic-checks:
+    name: Basic Repository Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Markdown Syntax Check
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: "**/*.md"
+
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth_changed: ${{ steps.filter.outputs.auth }}
+      service_changed: ${{ steps.filter.outputs.service }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            auth:
+              - 'SampleAuthService/**'
+            service:
+              - 'ServiceName/**'
+
+
+  sample-auth-service:
+    name: SampleAuthService Build & Test
+    needs: detect-changes
+    if: needs.detect-changes.outputs.auth_changed == 'true'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: SampleAuthService
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet restore
+      - run: dotnet build --no-restore
+      - run: dotnet test tests/SampleAuthService.UnitTests --no-build
+
+
+  service-name:
+    name: ServiceName Build & Test
+    needs: detect-changes
+    if: needs.detect-changes.outputs.service_changed == 'true'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ServiceName
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet restore
+      - run: dotnet build --no-restore
+
+      - name: Unit Tests
+        run: dotnet test tests/ServiceName.UnitTests --no-build
