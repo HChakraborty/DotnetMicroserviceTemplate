@@ -3,12 +3,12 @@
 
 ## Table of Contents
 
-- [1. Is Clean Architecture Worth the Extra Effort?](#is-clean-architecture-worth-the-extra-effort)
-- [2. Layered Structure and Responsibilities](#layered-structure-and-responsibilities)
-- [3. Dependency Rule](#dependency-rule)
-- [4. Applicability](#applicability)
+- [1. Is Clean Architecture Worth the Extra Effort?](#1-is-clean-architecture-worth-the-extra-effort)
+- [2. Layered Structure and Responsibilities](#2-layered-structure-and-responsibilities)
+- [3. Dependency Rule](#3-dependency-rule)
+- [4. Applicability](#4-applicability)
 
-## Is Clean Architecture Worth the extra effort?
+## 1. Is Clean Architecture Worth the extra effort?
 
 <p align="center">
   <img src="../images/Architecture_Layer/Folder_Structure.png" width="500"/>
@@ -46,7 +46,7 @@
 
 
 
-## Layered Structure and Responsibilities
+## 2. Layered Structure and Responsibilities
 
 The template uses four primary layers (But can added depending on requirements, like Handler in CQRS pattern, etc.):
 
@@ -217,7 +217,7 @@ flowchart LR
 ```
 
 
-## Dependency Rule
+## 3. Dependency Rule
 
 All dependencies must point inward toward the Domain layer.
 
@@ -236,7 +236,7 @@ This means:
 By enforcing inward dependencies, the core business logic remains protected and stable even when external technologies change.
 
 
-## Applicability
+## 4. Applicability
 
 This architectural structure is not limited to microservices.
 
