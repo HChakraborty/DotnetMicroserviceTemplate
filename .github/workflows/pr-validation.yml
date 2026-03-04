@@ -1,0 +1,55 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validation:
+    name: Repository Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Environment Check
+        run: dotnet --info
+
+      - name: Detect Changed Files
+        id: changes
+        run: |
+          git fetch origin master
+
+          if git diff --name-only origin/master...HEAD | grep '^ServiceName/'; then
+            echo "service_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "service_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if git diff --name-only origin/master...HEAD | grep '^SampleAuthService/'; then
+            echo "auth_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "auth_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ServiceName Build & Test
+        if: steps.changes.outputs.service_changed == 'true'
+        run: |
+          cd ServiceName
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test tests/ServiceName.UnitTests --no-build
+
+      - name: SampleAuthService Build & Test
+        if: steps.changes.outputs.auth_changed == 'true'
+        run: |
+          cd SampleAuthService
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test tests/SampleAuthService.UnitTests --no-build
