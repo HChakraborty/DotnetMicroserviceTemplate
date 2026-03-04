@@ -5,83 +5,51 @@ on:
     branches: [master]
 
 jobs:
-
-  # Always run – This job verifies that the CI environment can install and run 
-  # the required .NET SDK before executing service-specific build and test steps.
-  basic-checks:
-    name: Environment Check
+  validation:
+    name: Repository Validation
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - run: dotnet --info
+      - name: Environment Check
+        run: dotnet --info
 
+      - name: Detect Changed Files
+        id: changes
+        run: |
+          git fetch origin master
 
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      auth_changed: ${{ steps.filter.outputs.auth }}
-      service_changed: ${{ steps.filter.outputs.service }}
+          if git diff --name-only origin/master...HEAD | grep '^ServiceName/'; then
+            echo "service_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "service_changed=false" >> $GITHUB_OUTPUT
+          fi
 
-    steps:
-      - uses: actions/checkout@v4
+          if git diff --name-only origin/master...HEAD | grep '^SampleAuthService/'; then
+            echo "auth_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "auth_changed=false" >> $GITHUB_OUTPUT
+          fi
 
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            auth:
-              - 'SampleAuthService/**'
-            service:
-              - 'ServiceName/**'
+      - name: ServiceName Build & Test
+        if: steps.changes.outputs.service_changed == 'true'
+        run: |
+          cd ServiceName
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test tests/ServiceName.UnitTests --no-build
 
-
-  sample-auth-service:
-    name: SampleAuthService Build & Test
-    needs: detect-changes
-    if: needs.detect-changes.outputs.auth_changed == 'true'
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: SampleAuthService
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - run: dotnet restore
-      - run: dotnet build --no-restore
-      - run: dotnet test tests/SampleAuthService.UnitTests --no-build
-
-
-  service-name:
-    name: ServiceName Build & Test
-    needs: detect-changes
-    if: needs.detect-changes.outputs.service_changed == 'true'
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ServiceName
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - run: dotnet restore
-      - run: dotnet build --no-restore
-
-      - name: Unit Tests
-        run: dotnet test tests/ServiceName.UnitTests --no-build
+      - name: SampleAuthService Build & Test
+        if: steps.changes.outputs.auth_changed == 'true'
+        run: |
+          cd SampleAuthService
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test tests/SampleAuthService.UnitTests --no-build
