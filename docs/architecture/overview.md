@@ -3,12 +3,13 @@
 
 ## Table of Contents
 
-- [1. Is Clean Architecture Worth the Extra Effort?](#1-is-clean-architecture-worth-the-extra-effort)
+- [1. Architecture Approach](#1-architecture-approach)
 - [2. Layered Structure and Responsibilities](#2-layered-structure-and-responsibilities)
 - [3. Dependency Rule](#3-dependency-rule)
 - [4. Applicability](#4-applicability)
+- [5. How This Template Applies Clean Architecture](#5-how-this-template-applies-clean-architecture)
 
-## 1. Is Clean Architecture Worth the extra effort?
+## 1. Architecture Approach
 
 <p align="center">
   <img src="../images/Architecture_Layer/Folder_Structure.png" width="500"/>
@@ -36,19 +37,18 @@
 * The system remains readable and maintainable as it grows.
 * Changes become safer and more predictable.
 
+### Long-term benefits
 
-### Long-Term Advantages
-
-* Infrastructure components (databases, messaging systems, frameworks) can be replaced without rewriting core logic.
-* Controllers remain thin and focused on request handling.
-* Testing becomes easier because business rules are independent of external dependencies.
-* The architecture scales better as the service evolves.
+- Infrastructure can change without affecting core business logic
+- Controllers remain thin and focused
+- Business rules are easier to test
+- The system remains maintainable as the service grows
 
 
 
 ## 2. Layered Structure and Responsibilities
 
-The template uses four primary layers (But can added depending on requirements, like Handler in CQRS pattern, etc.):
+The template uses four primary layers, though additional layers can be introduced depending on requirements (for example, CQRS handlers).
 
 
 ```mermaid
@@ -257,3 +257,44 @@ By isolating business logic from infrastructure and frameworks, the system remai
 * Flexible to evolving technical requirements
 
 Whether applied to a small service or a large distributed system, the same architectural boundaries help preserve clarity and long-term stability.
+
+## 5. How This Template Applies Clean Architecture
+
+In this template:
+
+- **API layer** → controllers and middleware
+- **Application layer** → use case services and DTOs
+- **Domain layer** → entities and business rules
+- **Infrastructure layer** → database access, messaging, caching
+
+This separation ensures that business logic remains independent from frameworks and external services.
+
+### Service Overview
+
+```mermaid
+flowchart LR
+    Client[Client]
+    API[API Layer]
+    APP[Application Layer]
+    DOMAIN[Domain Layer]
+    INFRA[Infrastructure Layer]
+
+    DB[(Database)]
+    CACHE[(Redis Cache)]
+    MQ[(Message Broker)]
+
+    Client --> API
+    API --> APP
+    APP --> DOMAIN
+    APP --> INFRA
+
+    INFRA --> DB
+    INFRA --> CACHE
+    INFRA --> MQ
+```
+
+External systems such as the database, cache, and message broker are accessed only through the Infrastructure layer, preserving the dependency rule of Clean Architecture.
+
+This template focuses on the internal architecture of a single microservice.
+
+API gateways, service meshes, and platform-level infrastructure are intentionally excluded to keep the template focused on service design rather than system-level orchestration.
