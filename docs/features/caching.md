@@ -175,7 +175,7 @@ Caching is treated strictly as a **performance optimization**. Cache failures mu
 
 If Redis becomes unavailable, cache operations behave as if the cache were empty. The application simply falls back to the database.
 
-That's why the Redis implementation handles failures internally and logs them for observability, rather than relying on the global exception handler, which would return a 500 Internal Server Error.
+That's why the Redis implementation handles failures internally and logs them for observability, rather than relying on the [global exception handler](exception-handling.md), which would return a 500 Internal Server Error.
 
 Common failure scenarios include:
 
